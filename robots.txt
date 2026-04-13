@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin-login.html
+
+Sitemap: https://www.digitallbooster.com/sitemap.xml
