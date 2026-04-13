@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Digitall Booster | Landing Page</title>
+    <meta
+      name="description"
+      content="Digitall Booster - Plateforme de services digitaux pour booster votre business."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container nav">
+        <a href="#" class="brand" id="brandHomeLink">
+          <img id="brandLogo" class="brand-logo" src="" alt="Logo Digitall Booster" />
+          <span class="brand-mark" id="brandMark">DB</span>
+          <span class="brand-name" id="brandName">Digitall Booster</span>
+        </a>
+        <nav class="menu">
+          <a id="navLink1" href="#services">Services</a>
+          <a id="navLink2" href="#illustrations">Portfolio</a>
+          <a id="navLink3" href="#contact">Contact</a>
+        </nav>
+        <div class="nav-actions">
+          <a id="navCmsButton" href="./admin.html" class="btn btn-ghost">CMS</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="app">
+      <section class="hero">
+        <div class="container hero-grid">
+          <div>
+            <p class="eyebrow" id="heroEyebrow"></p>
+            <h1 id="heroTitle"></h1>
+            <p class="subtitle" id="heroSubtitle"></p>
+            <div class="hero-cta">
+              <a id="primaryCta" href="#" class="btn btn-primary"></a>
+              <a id="secondaryCta" href="#" class="btn btn-light"></a>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="hero-image-wrap">
+              <img
+                id="heroMainImage"
+                class="hero-image"
+                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
+                alt="Illustration strategique digitale"
+              />
+            </div>
+            <div class="floating-chip chip-one">Campagnes Ads</div>
+            <div class="floating-chip chip-two">Growth SEO</div>
+            <div class="floating-chip chip-three">CRM Automation</div>
+            <div class="hero-card">
+              <p class="hero-card-title">Pourquoi Digitall Booster ?</p>
+              <ul id="heroBullets"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="services">
+        <div class="container">
+          <p class="section-kicker">Digitall Booster</p>
+          <h2 class="section-title">NOS SERVICES DIGITAUX</h2>
+          <p class="section-text">
+            Une equipe specialisee pour vous accompagner sur toute la chaine digitale.
+          </p>
+          <div class="service-grid" id="serviceGrid"></div>
+        </div>
+      </section>
+
+      <section class="section section-illustrations" id="illustrations">
+        <div class="container">
+          <p class="section-kicker">Illustrations</p>
+          <h2 class="section-title">Nos univers de travail</h2>
+          <div class="illustration-grid">
+            <article class="illustration-card">
+              <img
+                id="illustrationImage1"
+                src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80"
+                alt="Equipe digitale en collaboration"
+              />
+            </article>
+            <article class="illustration-card">
+              <img
+                id="illustrationImage2"
+                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
+                alt="Analyse de donnees et strategie"
+              />
+            </article>
+            <article class="illustration-card">
+              <img
+                id="illustrationImage3"
+                src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80"
+                alt="Pilotage de campagnes marketing"
+              />
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section contact" id="contact">
+        <div class="container contact-grid">
+          <div>
+            <p class="section-kicker">Contact</p>
+            <h2 class="section-title" id="contactTitle"></h2>
+            <p class="section-text" id="contactText"></p>
+          </div>
+          <div class="contact-card">
+            <p><strong>Telephone:</strong> <span id="contactPhone"></span></p>
+            <p><strong>Email:</strong> <span id="contactEmail"></span></p>
+            <p><strong>Site:</strong> <span id="contactWebsite"></span></p>
+            <p><strong>Adresse:</strong> <span id="contactAddress"></span></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-wrap">
+        <p class="footer-headline" id="footerText"></p>
+        <div class="footer-contact">
+          <span id="footerPhone"></span>
+          <span id="footerEmail"></span>
+          <span id="footerWebsite"></span>
+        </div>
+        <a id="footerCmsButton" class="btn btn-ghost footer-cms" href="./admin.html">Dashboard CMS</a>
+      </div>
+    </footer>
+
+    <script src="./content-default.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
