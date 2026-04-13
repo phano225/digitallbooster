@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Digitall Booster | Dashboard CMS</title>
+    <meta name="description" content="Dashboard CMS pour editer la landing page Digitall Booster." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/admin.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container">
+        <a href="./index.html" class="back">← Retour au site</a>
+        <h1>Dashboard CMS - Digitall Booster</h1>
+      </div>
+    </header>
+
+    <main class="container main">
+      <section class="panel">
+        <h2>Stockage V3 (Serveur)</h2>
+        <div class="grid-2">
+          <label>Mode d'upload
+            <select id="storageProvider">
+              <option value="local">Local (base64 navigateur)</option>
+              <option value="cloudinary">Cloudinary (serveur)</option>
+            </select>
+          </label>
+          <label>Cloudinary Cloud Name <input id="cloudinaryCloudName" type="text" placeholder="ex: votre-cloud-name" /></label>
+          <label>Cloudinary Upload Preset <input id="cloudinaryUploadPreset" type="text" placeholder="ex: digitall_unsigned" /></label>
+          <label>Dossier Cloudinary (optionnel) <input id="cloudinaryFolder" type="text" placeholder="ex: digitall-booster" /></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Branding & Menus</h2>
+        <div class="grid-2">
+          <label>Nom de marque <input id="brandName" type="text" /></label>
+          <label>URL Accueil <input id="brandHomeUrl" type="text" /></label>
+          <label class="full">Logo URL <input id="brandLogo" type="text" /></label>
+          <div class="upload-row full">
+            <button class="btn" type="button" data-upload-target="brandLogo">Uploader logo</button>
+            <input class="upload-input" id="upload-brandLogo" type="file" accept="image/*" />
+          </div>
+          <label>Menu 1 label <input id="nav1Label" type="text" /></label>
+          <label>Menu 1 URL <input id="nav1Url" type="text" /></label>
+          <label>Menu 2 label <input id="nav2Label" type="text" /></label>
+          <label>Menu 2 URL <input id="nav2Url" type="text" /></label>
+          <label>Menu 3 label <input id="nav3Label" type="text" /></label>
+          <label>Menu 3 URL <input id="nav3Url" type="text" /></label>
+          <label>Bouton CMS menu label <input id="navCmsLabel" type="text" /></label>
+          <label>Bouton CMS menu URL <input id="navCmsUrl" type="text" /></label>
+          <label>Bouton CMS footer label <input id="footerCmsLabel" type="text" /></label>
+          <label>Bouton CMS footer URL <input id="footerCmsUrl" type="text" /></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Hero</h2>
+        <div class="grid-2">
+          <label>Badge <input id="heroEyebrow" type="text" /></label>
+          <label>Titre <input id="heroTitle" type="text" /></label>
+          <label class="full">Image Hero URL <input id="heroImage" type="text" /></label>
+          <div class="upload-row full">
+            <button class="btn" type="button" data-upload-target="heroImage">Uploader image hero</button>
+            <input class="upload-input" id="upload-heroImage" type="file" accept="image/*,video/*" />
+          </div>
+          <label class="full">Sous-titre <textarea id="heroSubtitle" rows="3"></textarea></label>
+          <label>CTA principal label <input id="primaryCtaLabel" type="text" /></label>
+          <label>CTA principal URL <input id="primaryCtaUrl" type="text" /></label>
+          <label>CTA secondaire label <input id="secondaryCtaLabel" type="text" /></label>
+          <label>CTA secondaire URL <input id="secondaryCtaUrl" type="text" /></label>
+          <label class="full">Bullets (1 ligne = 1 item) <textarea id="heroBullets" rows="5"></textarea></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Media Illustrations</h2>
+        <div class="grid-2">
+          <label class="full">Illustration 1 URL <input id="illustrationImage1Input" type="text" /></label>
+          <div class="upload-row full">
+            <button class="btn" type="button" data-upload-target="illustrationImage1Input">Uploader illustration 1</button>
+            <input class="upload-input" id="upload-illustrationImage1Input" type="file" accept="image/*,video/*" />
+          </div>
+          <label class="full">Illustration 2 URL <input id="illustrationImage2Input" type="text" /></label>
+          <div class="upload-row full">
+            <button class="btn" type="button" data-upload-target="illustrationImage2Input">Uploader illustration 2</button>
+            <input class="upload-input" id="upload-illustrationImage2Input" type="file" accept="image/*,video/*" />
+          </div>
+          <label class="full">Illustration 3 URL <input id="illustrationImage3Input" type="text" /></label>
+          <div class="upload-row full">
+            <button class="btn" type="button" data-upload-target="illustrationImage3Input">Uploader illustration 3</button>
+            <input class="upload-input" id="upload-illustrationImage3Input" type="file" accept="image/*,video/*" />
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Services</h2>
+          <button id="addService" class="btn">+ Ajouter service</button>
+        </div>
+        <div id="servicesEditor" class="stack"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Theme Visuel</h2>
+        <div class="grid-2">
+          <label>Couleur Texte <input id="themeText" type="color" /></label>
+          <label>Couleur Texte secondaire <input id="themeMuted" type="color" /></label>
+          <label>Couleur Primaire <input id="themePrimary" type="color" /></label>
+          <label>Couleur Primaire foncee <input id="themePrimaryDark" type="color" /></label>
+          <label>Couleur Accent <input id="themeAccent" type="color" /></label>
+          <label>Fond principal <input id="themeBg" type="color" /></label>
+          <label>Gradient fond 1 <input id="themeBgGrad1" type="color" /></label>
+          <label>Gradient fond 2 <input id="themeBgGrad2" type="color" /></label>
+          <label>Bulle lumiere 1 <input id="themeBlob1" type="color" /></label>
+          <label>Bulle lumiere 2 <input id="themeBlob2" type="color" /></label>
+          <label class="full">Opacite verre (0.1-1) <input id="themeGlassOpacity" type="number" min="0.1" max="1" step="0.05" /></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Process</h2>
+          <button id="addStep" class="btn">+ Ajouter etape</button>
+        </div>
+        <div id="processEditor" class="stack"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Contact & Footer</h2>
+        <div class="grid-2">
+          <label>Titre contact <input id="contactTitle" type="text" /></label>
+          <label>Telephone <input id="contactPhone" type="text" /></label>
+          <label>Email <input id="contactEmail" type="text" /></label>
+          <label>Site web <input id="contactWebsite" type="text" /></label>
+          <label class="full">Texte contact <textarea id="contactText" rows="3"></textarea></label>
+          <label class="full">Adresse <input id="contactAddress" type="text" /></label>
+          <label class="full">Texte footer <input id="footerText" type="text" /></label>
+        </div>
+      </section>
+
+      <section class="panel actions">
+        <button id="saveButton" class="btn btn-primary">Sauvegarder</button>
+        <button id="resetButton" class="btn btn-danger">Reinitialiser</button>
+        <button id="exportButton" class="btn">Exporter JSON</button>
+        <label class="btn file-input">
+          Importer JSON
+          <input id="importInput" type="file" accept="application/json" />
+        </label>
+        <a href="./index.html" class="btn">Voir la landing page</a>
+      </section>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </main>
+
+    <script src="./data/content-default.js"></script>
+    <script src="./js/admin.js"></script>
+  </body>
+</html>
