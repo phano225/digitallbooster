@@ -71,6 +71,21 @@ body {
   font-size: 1.12rem;
 }
 
+.auth-panel {
+  border-color: #cde0ff;
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+}
+
+.auth-help {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.auth-status {
+  font-weight: 600;
+}
+
 .panel-head {
   display: flex;
   align-items: center;

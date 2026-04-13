@@ -43,19 +43,30 @@
     status.style.color = isError ? "#b3261e" : "#284b73";
   }
 
+  function setAuthStatus(text, isError) {
+    const node = byId("supabaseAuthStatus");
+    if (!node) {
+      return;
+    }
+    node.textContent = text;
+    node.style.color = isError ? "#b3261e" : "#1f5ea8";
+  }
+
   async function updateSupabaseAuthStatus() {
     const node = byId("supabaseAuthStatus");
     if (!node) {
       return;
     }
     if (!window.CMS_API || !window.CMS_API.isSupabaseEnabled()) {
-      node.textContent = "Mode local actif. Configure data/cms-config.js et provider=supabase pour le mode global.";
+      setAuthStatus("Mode local actif. Configure data/cms-config.js et provider=supabase pour le mode global.");
       return;
     }
     const session = await window.CMS_API.getSession();
-    node.textContent = session?.user?.email
-      ? `Connecte sur Supabase: ${session.user.email}`
-      : "Non connecte sur Supabase.";
+    setAuthStatus(
+      session?.user?.email
+        ? `Connecte sur Supabase: ${session.user.email}`
+        : "Non connecte sur Supabase."
+    );
   }
 
   function linesToArray(value) {
@@ -477,9 +488,13 @@
     });
 
     logoutButton.addEventListener("click", async () => {
-      await window.CMS_API.logout();
-      await updateSupabaseAuthStatus();
-      setStatus("Deconnexion Supabase effectuee.");
+      try {
+        await window.CMS_API.logout();
+        await updateSupabaseAuthStatus();
+        setStatus("Deconnexion Supabase effectuee.");
+      } catch (error) {
+        setStatus(error.message || "Echec de deconnexion.", true);
+      }
     });
 
     reloadButton.addEventListener("click", async () => {
@@ -513,16 +528,24 @@
     });
 
     byId("saveButton").addEventListener("click", async () => {
-      const payload = mergeContent(collectFormContent());
-      await saveContent(payload);
-      setStatus("Sauvegarde effectuee. Rechargez la landing page pour voir les changements.");
+      try {
+        const payload = mergeContent(collectFormContent());
+        await saveContent(payload);
+        setStatus("Sauvegarde effectuee. Rechargez la landing page pour voir les changements.");
+      } catch (error) {
+        setStatus(error.message || "Echec de sauvegarde.", true);
+      }
     });
 
     byId("resetButton").addEventListener("click", async () => {
-      const defaults = cloneDefault();
-      await saveContent(defaults);
-      renderEditors(defaults);
-      setStatus("Contenu reinitialise avec les valeurs par defaut.");
+      try {
+        const defaults = cloneDefault();
+        await saveContent(defaults);
+        renderEditors(defaults);
+        setStatus("Contenu reinitialise avec les valeurs par defaut.");
+      } catch (error) {
+        setStatus(error.message || "Echec de reinitialisation.", true);
+      }
     });
 
     byId("exportButton").addEventListener("click", () => {
@@ -544,9 +567,13 @@
       }
       const parsed = mergeContent(parsedRaw);
 
-      await saveContent(parsed);
-      renderEditors(parsed);
-      setStatus("Import termine et contenu charge.");
+      try {
+        await saveContent(parsed);
+        renderEditors(parsed);
+        setStatus("Import termine et contenu charge.");
+      } catch (error) {
+        setStatus(error.message || "Echec import.", true);
+      }
     });
   }
 

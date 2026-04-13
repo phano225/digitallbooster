@@ -37,18 +37,21 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel auth-panel">
         <h2>Admin Supabase (V4 Global)</h2>
-        <div class="grid-2">
-          <label>Email admin <input id="supabaseEmail" type="email" /></label>
-          <label>Mot de passe <input id="supabasePassword" type="password" /></label>
+        <p class="auth-help">
+          Connecte-toi avec ton utilisateur Supabase pour activer la sauvegarde globale.
+        </p>
+        <div class="grid-2 auth-grid">
+          <label>Email admin <input id="supabaseEmail" type="email" placeholder="admin@exemple.com" /></label>
+          <label>Mot de passe <input id="supabasePassword" type="password" placeholder="Mot de passe Supabase" /></label>
         </div>
         <div class="actions">
           <button id="supabaseLoginButton" class="btn btn-primary" type="button">Connexion Supabase</button>
           <button id="supabaseLogoutButton" class="btn" type="button">Deconnexion</button>
           <button id="reloadRemoteButton" class="btn" type="button">Recharger depuis la base</button>
         </div>
-        <p id="supabaseAuthStatus" class="status"></p>
+        <p id="supabaseAuthStatus" class="status auth-status"></p>
       </section>
 
       <section class="panel">
