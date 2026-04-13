@@ -18,48 +18,11 @@
       <div class="container">
         <a href="./index.html" class="back">← Retour au site</a>
         <h1>Dashboard CMS - Digitall Booster</h1>
+        <button id="logoutButton" class="btn" type="button">Deconnexion</button>
       </div>
     </header>
 
     <main class="container main">
-      <section class="panel">
-        <h2>Stockage V3 (Serveur)</h2>
-        <div class="grid-2">
-          <label>Mode d'upload
-            <select id="storageProvider">
-              <option value="local">Local (base64 navigateur)</option>
-              <option value="cloudinary">Cloudinary (serveur)</option>
-            </select>
-          </label>
-          <label>Cloudinary Cloud Name <input id="cloudinaryCloudName" type="text" placeholder="ex: votre-cloud-name" /></label>
-          <label>Cloudinary Upload Preset <input id="cloudinaryUploadPreset" type="text" placeholder="ex: digitall_unsigned" /></label>
-          <label>Dossier Cloudinary (optionnel) <input id="cloudinaryFolder" type="text" placeholder="ex: digitall-booster" /></label>
-        </div>
-      </section>
-
-      <section class="panel auth-panel">
-        <h2>Admin Supabase (V4 Global)</h2>
-        <p class="auth-help">
-          Connecte-toi avec ton utilisateur Supabase pour activer la sauvegarde globale.
-        </p>
-        <div class="grid-2 auth-grid">
-          <label>Email admin <input id="supabaseEmail" type="email" placeholder="admin@exemple.com" /></label>
-          <label>Mot de passe <input id="supabasePassword" type="password" placeholder="Mot de passe Supabase" /></label>
-        </div>
-        <div class="actions">
-          <button id="supabaseLoginButton" class="btn btn-primary" type="button">Connexion Supabase</button>
-          <button id="supabaseLogoutButton" class="btn" type="button">Deconnexion</button>
-          <button id="reloadRemoteButton" class="btn" type="button">Recharger depuis la base</button>
-        </div>
-        <p id="supabaseAuthStatus" class="status auth-status"></p>
-      </section>
-
-      <section id="authLockedInfo" class="panel auth-locked-note">
-        <h2>Acces Restreint</h2>
-        <p>Connecte-toi d'abord avec un compte Supabase pour afficher et modifier le dashboard CMS.</p>
-      </section>
-
-      <div id="protectedContent">
       <section class="panel">
         <h2>Branding & Menus</h2>
         <div class="grid-2">
@@ -179,7 +142,6 @@
         </label>
         <a href="./index.html" class="btn">Voir la landing page</a>
       </section>
-      </div>
 
       <p id="status" class="status" role="status" aria-live="polite"></p>
     </main>

@@ -37,6 +37,13 @@
     return document.getElementById(id);
   }
 
+  function setValue(id, value) {
+    const element = byId(id);
+    if (element) {
+      element.value = value ?? "";
+    }
+  }
+
   function setStatus(text, isError) {
     const status = byId("status");
     status.textContent = text;
@@ -154,12 +161,17 @@
   }
 
   function getStorageConfigFromForm() {
+    const providerElement = byId("storageProvider");
+    const cloudNameElement = byId("cloudinaryCloudName");
+    const uploadPresetElement = byId("cloudinaryUploadPreset");
+    const folderElement = byId("cloudinaryFolder");
+
     return {
-      provider: byId("storageProvider").value || "local",
+      provider: providerElement?.value || "local",
       cloudinary: {
-        cloudName: byId("cloudinaryCloudName").value.trim(),
-        uploadPreset: byId("cloudinaryUploadPreset").value.trim(),
-        folder: byId("cloudinaryFolder").value.trim()
+        cloudName: cloudNameElement?.value?.trim() || "",
+        uploadPreset: uploadPresetElement?.value?.trim() || "",
+        folder: folderElement?.value?.trim() || ""
       }
     };
   }
@@ -259,10 +271,10 @@
   }
 
   function renderEditors(content) {
-    byId("storageProvider").value = content.storage.provider || "local";
-    byId("cloudinaryCloudName").value = content.storage.cloudinary.cloudName || "";
-    byId("cloudinaryUploadPreset").value = content.storage.cloudinary.uploadPreset || "";
-    byId("cloudinaryFolder").value = content.storage.cloudinary.folder || "";
+    setValue("storageProvider", content.storage.provider || "local");
+    setValue("cloudinaryCloudName", content.storage.cloudinary.cloudName || "");
+    setValue("cloudinaryUploadPreset", content.storage.cloudinary.uploadPreset || "");
+    setValue("cloudinaryFolder", content.storage.cloudinary.folder || "");
 
     byId("brandName").value = content.branding.name || "";
     byId("brandLogo").value = content.branding.logo || "";
@@ -531,6 +543,29 @@
     });
   }
 
+  async function ensureAdminAccess() {
+    if (!window.CMS_API || !window.CMS_API.isSupabaseEnabled()) {
+      return;
+    }
+    const session = await window.CMS_API.getSession();
+    if (!session) {
+      window.location.href = "./admin-login.html";
+    }
+  }
+
+  function setupLogoutButton() {
+    const button = byId("logoutButton");
+    if (!button || !window.CMS_API) {
+      return;
+    }
+    button.addEventListener("click", async () => {
+      if (window.CMS_API.isSupabaseEnabled()) {
+        await window.CMS_API.logout();
+      }
+      window.location.href = "./admin-login.html";
+    });
+  }
+
   function downloadJson(content) {
     const blob = new Blob([JSON.stringify(content, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -605,12 +640,14 @@
   }
 
   async function init() {
+    await ensureAdminAccess();
     const content = await loadContent();
     renderEditors(content);
     bindDynamicDelete();
     bindMediaUploads();
     setupButtons();
     setupSupabaseAuth();
+    setupLogoutButton();
     await updateSupabaseAuthStatus();
     await refreshProtectedUi();
   }

@@ -21,9 +21,9 @@ window.DIGITALL_DEFAULT_CONTENT = {
       { label: "Contact", url: "#contact" }
     ],
     cmsLabel: "CMS",
-    cmsUrl: "./admin.html",
+    cmsUrl: "./admin-login.html",
     footerCmsLabel: "Dashboard CMS",
-    footerCmsUrl: "./admin.html"
+    footerCmsUrl: "./admin-login.html"
   },
   theme: {
     bg: "#ecf4ff",
