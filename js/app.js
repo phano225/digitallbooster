@@ -11,7 +11,9 @@
   function mergeContent(raw) {
     const d = structuredClone(window.DIGITALL_DEFAULT_CONTENT);
     if (!raw || typeof raw !== "object") return d;
-    const m = { ...d, ...raw,
+    return {
+      ...d,
+      ...raw,
       branding: { ...d.branding, ...(raw.branding || {}) },
       navigation: { ...d.navigation, ...(raw.navigation || {}) },
       theme: { ...d.theme, ...(raw.theme || {}) },
@@ -19,21 +21,33 @@
       contact: { ...d.contact, ...(raw.contact || {}) },
       story: { ...d.story, ...(raw.story || {}) },
       whatsapp: { ...d.whatsapp, ...(raw.whatsapp || {}) },
-      socials: { ...d.socials, ...(raw.socials || {}) }
+      socials: { ...d.socials, ...(raw.socials || {}) },
+      // Force overwrite arrays explicitly from remote
+      services: Array.isArray(raw.services) && raw.services.length > 0 ? raw.services : d.services,
+      portfolio: Array.isArray(raw.portfolio) && raw.portfolio.length > 0 ? raw.portfolio : d.portfolio
     };
-    if (Array.isArray(raw.navigation?.links) && raw.navigation.links.length > 0) {
-      m.navigation.links = raw.navigation.links;
-    }
-    if (Array.isArray(raw.services) && raw.services.length > 0) m.services = raw.services;
-    if (Array.isArray(raw.portfolio) && raw.portfolio.length > 0) m.portfolio = raw.portfolio;
-    if (Array.isArray(raw.story?.timeline) && raw.story.timeline.length > 0) m.story.timeline = raw.story.timeline;
-    return m;
+  }
+
+  function applyTheme(c) {
+    const r = document.documentElement;
+    const t = c.theme || {};
+    if (t.bg) r.style.setProperty('--black', t.bg);
+    if (t.primary) r.style.setProperty('--green', t.primary);
+    if (t.accent) r.style.setProperty('--orange', t.accent);
+    document.body.style.backgroundColor = t.bg || "#070707";
+    document.body.style.color = t.text || "#FAF9F6";
   }
 
   async function getContent() {
+    // Force Clear Legacy Local Storages just in case
+    localStorage.removeItem("digitall-booster-content-v1");
+    localStorage.removeItem("digitall-booster-content-v2");
+
     if (window.CMS_API) {
-      const loaded = await window.CMS_API.loadContent(window.DIGITALL_DEFAULT_CONTENT);
-      return mergeContent(loaded);
+      try {
+        const loaded = await window.CMS_API.loadContent(window.DIGITALL_DEFAULT_CONTENT);
+        return mergeContent(loaded);
+      } catch(e) { console.error("CMS Error", e); }
     }
     const raw = localStorage.getItem(window.DIGITALL_STORAGE_KEY);
     return raw ? mergeContent(safeParse(raw)) : structuredClone(window.DIGITALL_DEFAULT_CONTENT);
@@ -357,6 +371,7 @@
 
   async function init() {
     const content = await getContent();
+    applyTheme(content); // FORCE THEME
     applyBranding(content);
     applyNavigation(content);
     renderHero(content);
