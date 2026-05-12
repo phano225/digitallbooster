@@ -134,11 +134,11 @@
       ...service
     }));
 
-    const illustrations = Array.isArray(rawContent.illustrations) ? rawContent.illustrations : DEFAULTS.illustrations;
-    merged.illustrations = illustrations.slice(0, 3);
-    while (merged.illustrations.length < 3) {
-      merged.illustrations.push(DEFAULTS.illustrations[merged.illustrations.length]);
-    }
+    const portfolio = Array.isArray(rawContent.portfolio) ? rawContent.portfolio : DEFAULTS.portfolio;
+    merged.portfolio = portfolio.map((item, index) => ({
+      ...DEFAULTS.portfolio[index % DEFAULTS.portfolio.length],
+      ...item
+    }));
 
     return merged;
   }
@@ -235,14 +235,48 @@
           <input type="text" data-field="image" value="${escapeAttribute(service.image)}">
         </label>
         <div class="upload-row full">
-          <button type="button" class="btn" data-upload-service-media>Uploader media</button>
-          <input type="file" class="upload-input" data-upload-service-input accept="image/*,video/*">
+          <button type="button" class="btn" data-upload-media>Uploader media</button>
+          <input type="file" class="upload-input" data-upload-input accept="image/*,video/*">
         </div>
         <label class="full">Description
           <textarea rows="2" data-field="description">${escapeAttribute(service.description)}</textarea>
         </label>
         <label class="full">Points (1 ligne = 1 point)
           <textarea rows="3" data-field="points">${escapeAttribute((Array.isArray(service.points) ? service.points : []).join("\n"))}</textarea>
+        </label>
+      </div>
+    `;
+    host.appendChild(wrapper);
+  }
+
+  function addPortfolioEditor(host, item, index) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "item";
+    wrapper.dataset.role = "portfolio-item";
+    wrapper.innerHTML = `
+      <div class="item-header">
+        <p class="item-title">Projet ${index + 1}</p>
+        <button type="button" class="btn btn-danger" data-remove-portfolio>Supprimer</button>
+      </div>
+      <div class="grid-2">
+        <label>Titre du projet
+          <input type="text" data-field="title" value="${escapeAttribute(item.title)}">
+        </label>
+        <label>Media Type
+          <select data-field="type">
+            <option value="image" ${item.type === "video" ? "" : "selected"}>Image</option>
+            <option value="video" ${item.type === "video" ? "selected" : ""}>Video</option>
+          </select>
+        </label>
+        <label class="full">Media URL
+          <input type="text" data-field="mediaUrl" value="${escapeAttribute(item.mediaUrl)}">
+        </label>
+        <div class="upload-row full">
+          <button type="button" class="btn" data-upload-media>Uploader media</button>
+          <input type="file" class="upload-input" data-upload-input accept="image/*,video/*">
+        </div>
+        <label class="full">Description
+          <textarea rows="3" data-field="description">${escapeAttribute(item.description)}</textarea>
         </label>
       </div>
     `;
@@ -299,10 +333,6 @@
     byId("secondaryCtaLabel").value = content.hero.secondaryCtaLabel || "";
     byId("secondaryCtaUrl").value = content.hero.secondaryCtaUrl || "";
     byId("heroBullets").value = (content.hero.bullets || []).join("\n");
-    const illustrations = Array.isArray(content.illustrations) ? content.illustrations : [];
-    byId("illustrationImage1Input").value = illustrations[0] || "";
-    byId("illustrationImage2Input").value = illustrations[1] || "";
-    byId("illustrationImage3Input").value = illustrations[2] || "";
 
     byId("themeText").value = content.theme.text || "#10233f";
     byId("themeMuted").value = content.theme.muted || "#4f637f";
@@ -319,6 +349,10 @@
     const servicesEditor = byId("servicesEditor");
     servicesEditor.innerHTML = "";
     (content.services || []).forEach((service, index) => addServiceEditor(servicesEditor, service, index));
+
+    const portfolioEditor = byId("portfolioEditor");
+    portfolioEditor.innerHTML = "";
+    (content.portfolio || []).forEach((item, index) => addPortfolioEditor(portfolioEditor, item, index));
 
     const processEditor = byId("processEditor");
     processEditor.innerHTML = "";
@@ -344,6 +378,17 @@
         points: linesToArray(item.querySelector('[data-field="points"]').value)
       }))
       .filter((service) => service.title || service.description || service.icon || service.points.length > 0);
+  }
+
+  function collectPortfolio() {
+    return Array.from(document.querySelectorAll('[data-role="portfolio-item"]'))
+      .map((item) => ({
+        title: item.querySelector('[data-field="title"]').value.trim(),
+        type: item.querySelector('[data-field="type"]').value,
+        mediaUrl: item.querySelector('[data-field="mediaUrl"]').value.trim(),
+        description: item.querySelector('[data-field="description"]').value.trim()
+      }))
+      .filter((item) => item.title || item.mediaUrl);
   }
 
   function collectProcess() {
@@ -402,12 +447,8 @@
         bullets: linesToArray(byId("heroBullets").value)
       },
       services: collectServices(),
+      portfolio: collectPortfolio(),
       process: collectProcess(),
-      illustrations: [
-        byId("illustrationImage1Input").value.trim(),
-        byId("illustrationImage2Input").value.trim(),
-        byId("illustrationImage3Input").value.trim()
-      ],
       contact: {
         title: byId("contactTitle").value.trim(),
         text: byId("contactText").value.trim(),
@@ -427,19 +468,24 @@
         removeServiceButton.closest('[data-role="service-item"]').remove();
       }
 
+      const removePortfolioButton = event.target.closest("[data-remove-portfolio]");
+      if (removePortfolioButton) {
+        removePortfolioButton.closest('[data-role="portfolio-item"]').remove();
+      }
+
       const removeStepButton = event.target.closest("[data-remove-step]");
       if (removeStepButton) {
         removeStepButton.closest('[data-role="step-item"]').remove();
       }
 
-      const uploadServiceButton = event.target.closest("[data-upload-service-media]");
-      if (uploadServiceButton) {
-        uploadServiceButton.parentElement.querySelector("[data-upload-service-input]").click();
+      const uploadMediaButton = event.target.closest("[data-upload-media]");
+      if (uploadMediaButton) {
+        uploadMediaButton.parentElement.querySelector("[data-upload-input]").click();
       }
     });
 
     document.body.addEventListener("change", async (event) => {
-      if (!event.target.matches("[data-upload-service-input]")) {
+      if (!event.target.matches("[data-upload-input]")) {
         return;
       }
       const file = event.target.files?.[0];
@@ -447,19 +493,20 @@
         return;
       }
       try {
-        setStatus("Upload media service en cours...");
+        setStatus("Upload media en cours...");
         const uploadedUrl = await uploadFileWithProvider(file, getStorageConfigFromForm());
-        const container = event.target.closest(".upload-row")?.previousElementSibling?.querySelector('[data-field="image"]');
-        const mediaTypeSelect = event.target.closest(".grid-2")?.querySelector('[data-field="mediaType"]');
+        // Find the input field for mediaUrl or image within the same item
+        const container = event.target.closest(".item").querySelector('[data-field="mediaUrl"], [data-field="image"]');
+        const mediaTypeSelect = event.target.closest(".item").querySelector('[data-field="type"], [data-field="mediaType"]');
         if (container) {
           container.value = uploadedUrl;
         }
         if (mediaTypeSelect) {
           mediaTypeSelect.value = file.type.startsWith("video/") ? "video" : "image";
         }
-        setStatus("Upload media service termine.");
+        setStatus("Upload media termine.");
       } catch (error) {
-        setStatus(error.message || "Erreur upload media service.", true);
+        setStatus(error.message || "Erreur upload media.", true);
       }
     });
   }
@@ -581,6 +628,12 @@
       const host = byId("servicesEditor");
       const count = host.querySelectorAll('[data-role="service-item"]').length;
       addServiceEditor(host, { icon: "✨", title: "", mediaType: "image", image: "", description: "", points: [] }, count);
+    });
+
+    byId("addPortfolio").addEventListener("click", () => {
+      const host = byId("portfolioEditor");
+      const count = host.querySelectorAll('[data-role="portfolio-item"]').length;
+      addPortfolioEditor(host, { type: "image", mediaUrl: "", title: "", description: "" }, count);
     });
 
     byId("addStep").addEventListener("click", () => {

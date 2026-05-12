@@ -1,4 +1,4 @@
-window.DIGITALL_STORAGE_KEY = "digitall-booster-content-v1";
+window.DIGITALL_STORAGE_KEY = "digitall-booster-content-v2";
 
 window.DIGITALL_DEFAULT_CONTENT = {
   storage: {
@@ -16,157 +16,97 @@ window.DIGITALL_DEFAULT_CONTENT = {
   },
   navigation: {
     links: [
-      { label: "Services", url: "#services" },
-      { label: "Portfolio", url: "#illustrations" },
+      { label: "Expertises", url: "#services" },
+      { label: "Portfolio", url: "#portfolio" },
       { label: "Contact", url: "#contact" }
     ],
-    cmsLabel: "CMS",
+    cmsLabel: "Espace Client",
     cmsUrl: "./admin-login.html",
     footerCmsLabel: "Dashboard CMS",
     footerCmsUrl: "./admin-login.html"
   },
   theme: {
-    bg: "#ecf4ff",
-    text: "#10233f",
-    muted: "#4f637f",
-    primary: "#0d63d4",
-    primaryDark: "#083f85",
-    accent: "#f39b34",
-    glass: "rgba(255, 255, 255, 0.56)",
-    bgGrad1: "#dfeeff",
-    bgGrad2: "#ffe8cf",
-    blob1: "#79b9ff",
-    blob2: "#ffbb74"
+    bg: "#f4f6f9",
+    text: "#212529",
+    muted: "#6c757d",
+    primary: "#0056b3",
+    primaryDark: "#004085",
+    accent: "#0d6efd",
+    glass: "rgba(255, 255, 255, 0.85)",
+    bgGrad1: "#e9ecef",
+    bgGrad2: "#dee2e6",
+    blob1: "#cce5ff",
+    blob2: "#b8daff"
   },
   hero: {
-    eyebrow: "Digitall Booster",
-    title: "Boostez votre business avec nos services digitaux",
+    eyebrow: "Agence de Développement",
+    title: "Créons ensemble vos applications Web et Mobiles",
     subtitle:
-      "Creation, communication, vente et innovation: une offre complete pour accelerer votre croissance.",
-    primaryCtaLabel: "Parler a un expert",
+      "De la conception à la mise en production, notre équipe d'experts développe des solutions digitales sur-mesure pour accélérer votre croissance.",
+    primaryCtaLabel: "Démarrer un projet",
     primaryCtaUrl: "#contact",
-    secondaryCtaLabel: "Nos services digitaux",
-    secondaryCtaUrl: "#services",
-    bullets: [
-      "Accompagnement 360 pour entreprises et entrepreneurs",
-      "Execution rapide avec suivi clair des resultats",
-      "Equipe experte en web, marketing, branding et data",
-      "Solutions adaptees a votre niveau de maturite digitale"
-    ],
+    secondaryCtaLabel: "Nos Réalisations",
+    secondaryCtaUrl: "#portfolio",
     image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
+      "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80"
   },
   services: [
     {
       icon: "💻",
-      title: "Creation & Developpement",
+      title: "Développement Web",
       mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
-      points: ["Sites Web", "Apps Mobiles", "Maintenance"]
+      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+      points: ["Sites Vitrines", "Applications SaaS", "Plateformes E-commerce"]
     },
     {
-      icon: "📣",
-      title: "Marketing Digital",
+      icon: "📱",
+      title: "Applications Mobiles",
       mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1557838923-2985c318be48?auto=format&fit=crop&w=1200&q=80",
-      points: ["Social Media", "Publicite en Ligne"]
+      image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=1200&q=80",
+      points: ["Développement iOS", "Développement Android", "Apps React Native / Flutter"]
     },
     {
       icon: "🎨",
-      title: "Branding & Design",
+      title: "UI / UX Design",
       mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1200&q=80",
-      points: ["Logos", "Identite Visuelle"]
-    },
-    {
-      icon: "💬",
-      title: "Gestion des Reseaux Sociaux",
-      mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1611224923853-80b023f02d71?auto=format&fit=crop&w=1200&q=80",
-      points: ["Community Management"]
-    },
-    {
-      icon: "🛒",
-      title: "E-commerce & Vente en Ligne",
-      mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1200&q=80",
-      points: ["Boutiques en Ligne", "Paiement"]
-    },
-    {
-      icon: "🔎",
-      title: "Referencement SEO / SEA",
-      mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1571721795195-a2ca2d3370a9?auto=format&fit=crop&w=1200&q=80",
-      points: ["Optimisation", "Google Ads"]
+      image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1200&q=80",
+      points: ["Maquettes interactives", "Parcours utilisateurs", "Identité visuelle"]
     },
     {
       icon: "⚙️",
-      title: "Automatisation & CRM",
+      title: "Maintenance & DevOps",
       mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
-      points: ["Chatbots", "Systemes CRM"]
-    },
-    {
-      icon: "🎓",
-      title: "Formation & Coaching",
-      mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
-      points: ["Marketing Digital", "Business"]
-    },
-    {
-      icon: "🎬",
-      title: "Production Audiovisuelle",
-      mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?auto=format&fit=crop&w=1200&q=80",
-      points: ["Videos", "Shooting Photo"]
-    },
-    {
-      icon: "📊",
-      title: "Analyse & Data",
-      mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
-      points: ["Statistiques", "Reporting"]
-    },
-    {
-      icon: "🛡️",
-      title: "Cybersecurite",
-      mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1200&q=80",
-      points: ["Securite", "Protection des Donnees"]
-    },
-    {
-      icon: "💡",
-      title: "Solutions Innovantes",
-      mediaType: "image",
-      image:
-        "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80",
-      points: ["IA", "SaaS", "NFT", "Web3"]
+      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+      points: ["Hébergement Cloud", "Mise à jour sécurisée", "Intégration continue"]
     }
   ],
-  process: [],
-  illustrations: [
-    "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80"
+  portfolio: [
+    {
+      type: "image",
+      mediaUrl: "https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=1200&q=80",
+      title: "Application E-commerce B2B",
+      description: "Plateforme complète de gestion de commandes avec application mobile Android."
+    },
+    {
+      type: "image",
+      mediaUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+      title: "Dashboard d'Analyse Financière",
+      description: "Application Web React.js pour le suivi et la visualisation de données en temps réel."
+    },
+    {
+      type: "image",
+      mediaUrl: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=80",
+      title: "Application iOS de Réservation",
+      description: "Application native iOS (Swift) pour un service de conciergerie de luxe."
+    }
   ],
   contact: {
-    title: "Parlons de votre projet digital",
-    text: "Nous vous aidons a structurer, lancer et scaler vos activites digitales avec des actions concretes.",
+    title: "Parlons de votre projet de développement",
+    text: "Nous accompagnons startups et entreprises dans la réalisation de leurs produits technologiques.",
     phone: "+225 07 07 07 07 07",
     email: "contact@digitallbooster.com",
     website: "www.digitallbooster.com",
-    address: "Abidjan, Cote d'Ivoire"
+    address: "Abidjan, Côte d'Ivoire"
   },
-  footerText: "BOOSTEZ VOTRE BUSINESS AVEC DIGITALL BOOSTER !"
+  footerText: "DIGITALL BOOSTER - VOTRE PARTENAIRE TECHNOLOGIQUE POUR DES APPLICATIONS PERFORMANTES."
 };

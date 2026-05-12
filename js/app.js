@@ -44,11 +44,12 @@
       ...service
     }));
 
-    const illustrations = Array.isArray(rawContent.illustrations) ? rawContent.illustrations : defaults.illustrations;
-    merged.illustrations = illustrations.slice(0, 3);
-    while (merged.illustrations.length < 3) {
-      merged.illustrations.push(defaults.illustrations[merged.illustrations.length]);
-    }
+    // Merge portfolio
+    const portfolio = Array.isArray(rawContent.portfolio) && rawContent.portfolio.length > 0 ? rawContent.portfolio : defaults.portfolio;
+    merged.portfolio = portfolio.map((item, index) => ({
+      ...defaults.portfolio[index % defaults.portfolio.length],
+      ...item
+    }));
 
     return merged;
   }
@@ -141,17 +142,6 @@
     fillLink("primaryCta", content.hero.primaryCtaLabel, content.hero.primaryCtaUrl);
     fillLink("secondaryCta", content.hero.secondaryCtaLabel, content.hero.secondaryCtaUrl);
     fillImage("heroMainImage", content.hero.image);
-
-    const bulletsHost = document.getElementById("heroBullets");
-    if (!bulletsHost) {
-      return;
-    }
-    bulletsHost.innerHTML = "";
-    (content.hero.bullets || []).forEach((bullet) => {
-      const li = document.createElement("li");
-      li.textContent = bullet;
-      bulletsHost.appendChild(li);
-    });
   }
 
   function createServiceMedia(service, index) {
@@ -182,7 +172,7 @@
 
     const icon = document.createElement("span");
     icon.className = "service-icon";
-    icon.textContent = service.icon || "✨";
+    icon.textContent = service.icon || "💻";
     media.appendChild(icon);
 
     return media;
@@ -197,14 +187,11 @@
 
     (content.services || []).forEach((service, index) => {
       const card = document.createElement("article");
-      card.className = "service-card";
+      card.className = "service-card animate-on-scroll";
+      card.style.animationDelay = `${index * 0.15}s`;
 
       const title = document.createElement("h3");
       title.textContent = service.title || "";
-
-      const body = document.createElement("div");
-      body.className = "service-body";
-      body.appendChild(title);
 
       const points = Array.isArray(service.points)
         ? service.points
@@ -212,6 +199,9 @@
             .split("|")
             .map((point) => point.trim())
             .filter(Boolean);
+
+      card.appendChild(createServiceMedia(service, index));
+      card.appendChild(title);
 
       if (points.length > 0) {
         const list = document.createElement("ul");
@@ -221,10 +211,61 @@
           item.textContent = point;
           list.appendChild(item);
         });
-        body.appendChild(list);
+        card.appendChild(list);
       }
 
-      card.append(createServiceMedia(service, index), body);
+      host.appendChild(card);
+    });
+  }
+
+  function renderPortfolio(content) {
+    const host = document.getElementById("portfolioGrid");
+    if (!host) {
+      return;
+    }
+    host.innerHTML = "";
+
+    (content.portfolio || []).forEach((item, index) => {
+      const card = document.createElement("article");
+      card.className = "portfolio-card animate-on-scroll";
+      card.style.animationDelay = `${index * 0.15}s`;
+
+      const media = document.createElement("div");
+      media.className = "portfolio-media";
+
+      if (item.type === "video") {
+        const video = document.createElement("video");
+        video.src = item.mediaUrl;
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.controls = true;
+        media.appendChild(video);
+      } else {
+        const img = document.createElement("img");
+        img.src = item.mediaUrl;
+        img.alt = item.title || "Portfolio image";
+        media.appendChild(img);
+      }
+
+      const contentDiv = document.createElement("div");
+      contentDiv.className = "portfolio-content";
+
+      const title = document.createElement("h3");
+      title.className = "portfolio-title";
+      title.textContent = item.title || "Projet Sans Titre";
+
+      const desc = document.createElement("p");
+      desc.className = "portfolio-desc";
+      desc.textContent = item.description || "";
+
+      contentDiv.appendChild(title);
+      contentDiv.appendChild(desc);
+
+      card.appendChild(media);
+      card.appendChild(contentDiv);
+
       host.appendChild(card);
     });
   }
@@ -242,10 +283,23 @@
     fillText("footerWebsite", content.contact.website);
   }
 
-  function renderIllustrations(content) {
-    fillImage("illustrationImage1", content.illustrations[0]);
-    fillImage("illustrationImage2", content.illustrations[1]);
-    fillImage("illustrationImage3", content.illustrations[2]);
+  function initAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          // Optional: unobserve if we only want it to animate once
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px"
+    });
+
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+      observer.observe(el);
+    });
   }
 
   async function init() {
@@ -255,8 +309,13 @@
     applyNavigation(content);
     renderHero(content);
     renderServices(content);
-    renderIllustrations(content);
+    renderPortfolio(content);
     renderContact(content);
+    
+    // Initialize scroll animations after DOM is updated
+    requestAnimationFrame(() => {
+      initAnimations();
+    });
   }
 
   init();

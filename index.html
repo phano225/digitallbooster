@@ -3,12 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Digitall Booster | Landing Page</title>
+    <title>Digitall Booster | Agence de Développement Web & Mobile</title>
     <meta
       name="description"
-      content="Digitall Booster - Plateforme de services digitaux pour booster votre business."
+      content="Digitall Booster - Votre agence spécialisée en développement de sites vitrines, applications web, Android et iOS."
     />
-    <meta name="google-site-verification" content="wAulT5zR5uGUe0wdyS9o9dKoSrJMzR2cM39ocpIsweM" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -26,12 +25,12 @@
           <span class="brand-name" id="brandName">Digitall Booster</span>
         </a>
         <nav class="menu">
-          <a id="navLink1" href="#services">Services</a>
-          <a id="navLink2" href="#illustrations">Portfolio</a>
+          <a id="navLink1" href="#services">Expertises</a>
+          <a id="navLink2" href="#portfolio">Portfolio</a>
           <a id="navLink3" href="#contact">Contact</a>
         </nav>
         <div class="nav-actions">
-          <a id="navCmsButton" href="./admin.html" class="btn btn-ghost">CMS</a>
+          <a id="navCmsButton" href="./admin.html" class="btn btn-ghost" style="border-color:var(--primary);color:var(--primary);background:rgba(0,86,179,0.1)">Espace Client</a>
         </div>
       </div>
     </header>
@@ -53,59 +52,37 @@
               <img
                 id="heroMainImage"
                 class="hero-image"
-                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
-                alt="Illustration strategique digitale"
+                src=""
+                alt="Illustration développement digital"
               />
             </div>
-            <div class="floating-chip chip-one">Campagnes Ads</div>
-            <div class="floating-chip chip-two">Growth SEO</div>
-            <div class="floating-chip chip-three">CRM Automation</div>
-            <div class="hero-card">
-              <p class="hero-card-title">Pourquoi Digitall Booster ?</p>
-              <ul id="heroBullets"></ul>
-            </div>
+            <div class="floating-chip chip-one">💻 Web Apps</div>
+            <div class="floating-chip chip-two">📱 iOS & Android</div>
+            <div class="floating-chip chip-three">🚀 UI/UX Design</div>
           </div>
         </div>
       </section>
 
-      <section class="section" id="services">
+      <section class="section section-soft" id="services">
         <div class="container">
-          <p class="section-kicker">Digitall Booster</p>
-          <h2 class="section-title">NOS SERVICES DIGITAUX</h2>
+          <p class="section-kicker">Nos Expertises</p>
+          <h2 class="section-title">Ingénierie & Développement</h2>
           <p class="section-text">
-            Une equipe specialisee pour vous accompagner sur toute la chaine digitale.
+            Des solutions technologiques sur-mesure pour donner vie à vos projets digitaux.
           </p>
           <div class="service-grid" id="serviceGrid"></div>
         </div>
       </section>
 
-      <section class="section section-illustrations" id="illustrations">
+      <section class="section" id="portfolio">
         <div class="container">
-          <p class="section-kicker">Illustrations</p>
-          <h2 class="section-title">Nos univers de travail</h2>
-          <div class="illustration-grid">
-            <article class="illustration-card">
-              <img
-                id="illustrationImage1"
-                src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80"
-                alt="Equipe digitale en collaboration"
-              />
-            </article>
-            <article class="illustration-card">
-              <img
-                id="illustrationImage2"
-                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
-                alt="Analyse de donnees et strategie"
-              />
-            </article>
-            <article class="illustration-card">
-              <img
-                id="illustrationImage3"
-                src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80"
-                alt="Pilotage de campagnes marketing"
-              />
-            </article>
-          </div>
+          <p class="section-kicker">Portfolio</p>
+          <h2 class="section-title">Nos Réalisations Récentes</h2>
+          <p class="section-text" style="margin-bottom: 40px;">
+            Découvrez nos derniers projets de développement de sites web, plateformes et applications mobiles.
+          </p>
+          <!-- Portfolio Grid rendered via JS -->
+          <div class="portfolio-grid" id="portfolioGrid"></div>
         </div>
       </section>
 
@@ -117,9 +94,9 @@
             <p class="section-text" id="contactText"></p>
           </div>
           <div class="contact-card">
-            <p><strong>Telephone:</strong> <span id="contactPhone"></span></p>
+            <p><strong>Téléphone:</strong> <span id="contactPhone"></span></p>
             <p><strong>Email:</strong> <span id="contactEmail"></span></p>
-            <p><strong>Site:</strong> <span id="contactWebsite"></span></p>
+            <p><strong>Site web:</strong> <span id="contactWebsite"></span></p>
             <p><strong>Adresse:</strong> <span id="contactAddress"></span></p>
           </div>
         </div>
@@ -128,6 +105,10 @@
 
     <footer class="footer">
       <div class="container footer-wrap">
+        <div class="footer-brand">
+          <span class="brand-mark" style="width:36px;height:36px;font-size:1rem;">DB</span>
+          Digitall Booster
+        </div>
         <p class="footer-headline" id="footerText"></p>
         <div class="footer-contact">
           <span id="footerPhone"></span>
