@@ -1,57 +1,33 @@
 (function bootstrapLandingPage() {
   const SERVICE_IMAGE_FALLBACKS = [
     "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1557838923-2985c318be48?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1611224923853-80b023f02d71?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1571721795195-a2ca2d3370a9?auto=format&fit=crop&w=1200&q=80"
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"
   ];
 
-  function safeParse(jsonString) {
-    try {
-      return JSON.parse(jsonString);
-    } catch (error) {
-      return null;
-    }
-  }
+  function safeParse(s) { try { return JSON.parse(s); } catch (e) { return null; } }
 
-  function mergeContent(rawContent) {
-    const defaults = structuredClone(window.DIGITALL_DEFAULT_CONTENT);
-    if (!rawContent || typeof rawContent !== "object") {
-      return defaults;
-    }
-
-    const merged = {
-      ...defaults,
-      ...rawContent,
-      branding: { ...defaults.branding, ...(rawContent.branding || {}) },
-      navigation: { ...defaults.navigation, ...(rawContent.navigation || {}) },
-      theme: { ...defaults.theme, ...(rawContent.theme || {}) },
-      hero: { ...defaults.hero, ...(rawContent.hero || {}) },
-      contact: { ...defaults.contact, ...(rawContent.contact || {}) }
+  function mergeContent(raw) {
+    const d = structuredClone(window.DIGITALL_DEFAULT_CONTENT);
+    if (!raw || typeof raw !== "object") return d;
+    const m = { ...d, ...raw,
+      branding: { ...d.branding, ...(raw.branding || {}) },
+      navigation: { ...d.navigation, ...(raw.navigation || {}) },
+      theme: { ...d.theme, ...(raw.theme || {}) },
+      hero: { ...d.hero, ...(raw.hero || {}) },
+      contact: { ...d.contact, ...(raw.contact || {}) },
+      story: { ...d.story, ...(raw.story || {}) },
+      whatsapp: { ...d.whatsapp, ...(raw.whatsapp || {}) },
+      socials: { ...d.socials, ...(raw.socials || {}) }
     };
-
-    const links = Array.isArray(rawContent.navigation?.links) ? rawContent.navigation.links : defaults.navigation.links;
-    merged.navigation.links = links.slice(0, 3).map((item, index) => ({
-      ...defaults.navigation.links[index],
-      ...(item || {})
-    }));
-
-    const services = Array.isArray(rawContent.services) && rawContent.services.length > 0 ? rawContent.services : defaults.services;
-    merged.services = services.map((service, index) => ({
-      ...defaults.services[index % defaults.services.length],
-      ...service
-    }));
-
-    // Merge portfolio
-    const portfolio = Array.isArray(rawContent.portfolio) && rawContent.portfolio.length > 0 ? rawContent.portfolio : defaults.portfolio;
-    merged.portfolio = portfolio.map((item, index) => ({
-      ...defaults.portfolio[index % defaults.portfolio.length],
-      ...item
-    }));
-
-    return merged;
+    if (Array.isArray(raw.navigation?.links) && raw.navigation.links.length > 0) {
+      m.navigation.links = raw.navigation.links;
+    }
+    if (Array.isArray(raw.services) && raw.services.length > 0) m.services = raw.services;
+    if (Array.isArray(raw.portfolio) && raw.portfolio.length > 0) m.portfolio = raw.portfolio;
+    if (Array.isArray(raw.story?.timeline) && raw.story.timeline.length > 0) m.story.timeline = raw.story.timeline;
+    return m;
   }
 
   async function getContent() {
@@ -60,261 +36,342 @@
       return mergeContent(loaded);
     }
     const raw = localStorage.getItem(window.DIGITALL_STORAGE_KEY);
-    if (!raw) {
-      return structuredClone(window.DIGITALL_DEFAULT_CONTENT);
-    }
-    return mergeContent(safeParse(raw));
+    return raw ? mergeContent(safeParse(raw)) : structuredClone(window.DIGITALL_DEFAULT_CONTENT);
   }
 
-  function fillText(id, value) {
-    const element = document.getElementById(id);
-    if (element) {
-      element.textContent = value || "";
-    }
-  }
+  function $(id) { return document.getElementById(id); }
+  function fillText(id, v) { const el = $(id); if (el) el.textContent = v || ""; }
+  function fillLink(id, label, url) { const el = $(id); if (!el) return; el.textContent = label || ""; el.setAttribute("href", url || "#"); }
+  function fillImage(id, src) { const el = $(id); if (el && src) el.setAttribute("src", src); }
 
-  function fillLink(id, label, url) {
-    const element = document.getElementById(id);
-    if (!element) {
-      return;
-    }
-    element.textContent = label || "";
-    element.setAttribute("href", url || "#");
-  }
-
-  function fillImage(id, src) {
-    const element = document.getElementById(id);
-    if (element && src) {
-      element.setAttribute("src", src);
+  function applyBranding(c) {
+    fillText("brandName", c.branding.name);
+    const homeLink = $("brandHomeLink");
+    if (homeLink) homeLink.setAttribute("href", c.branding.homeUrl || "#");
+    const logo = $("brandLogo"), mark = $("brandMark");
+    if (logo && mark) {
+      if (c.branding.logo) { logo.src = c.branding.logo; logo.style.display = "block"; mark.style.display = "none"; }
+      else { logo.style.display = "none"; mark.style.display = "grid"; }
     }
   }
 
-  function applyBranding(content) {
-    fillText("brandName", content.branding.name);
-    const homeLink = document.getElementById("brandHomeLink");
-    if (homeLink) {
-      homeLink.setAttribute("href", content.branding.homeUrl || "#");
+  function applyNavigation(c) {
+    const links = c.navigation.links || [];
+    for (let i = 0; i < 5; i++) {
+      fillLink("navLink" + (i + 1), links[i]?.label, links[i]?.url);
     }
-
-    const logoElement = document.getElementById("brandLogo");
-    const markElement = document.getElementById("brandMark");
-    if (logoElement && markElement) {
-      if (content.branding.logo) {
-        logoElement.src = content.branding.logo;
-        logoElement.style.display = "block";
-        markElement.style.display = "none";
-      } else {
-        logoElement.style.display = "none";
-        markElement.style.display = "grid";
-      }
-    }
+    fillLink("navCmsButton", c.navigation.cmsLabel, c.navigation.cmsUrl);
+    fillLink("footerCmsButton", c.navigation.footerCmsLabel, c.navigation.footerCmsUrl);
   }
 
-  function applyNavigation(content) {
-    const links = content.navigation.links || [];
-    fillLink("navLink1", links[0]?.label, links[0]?.url);
-    fillLink("navLink2", links[1]?.label, links[1]?.url);
-    fillLink("navLink3", links[2]?.label, links[2]?.url);
-    fillLink("navCmsButton", content.navigation.cmsLabel, content.navigation.cmsUrl);
-    fillLink("footerCmsButton", content.navigation.footerCmsLabel, content.navigation.footerCmsUrl);
+  function renderHero(c) {
+    fillText("heroEyebrow", c.hero.eyebrow);
+    fillText("heroTitle", c.hero.title);
+    fillText("heroSubtitle", c.hero.subtitle);
+    fillLink("primaryCta", c.hero.primaryCtaLabel, c.hero.primaryCtaUrl);
+    fillLink("secondaryCta", c.hero.secondaryCtaLabel, c.hero.secondaryCtaUrl);
+    fillImage("heroMainImage", c.hero.image);
   }
 
-  function applyTheme(content) {
-    const root = document.documentElement;
-    const theme = content.theme || {};
-    root.style.setProperty("--bg", theme.bg);
-    root.style.setProperty("--text", theme.text);
-    root.style.setProperty("--muted", theme.muted);
-    root.style.setProperty("--primary", theme.primary);
-    root.style.setProperty("--primary-dark", theme.primaryDark);
-    root.style.setProperty("--accent", theme.accent);
-    root.style.setProperty("--glass", theme.glass);
-    root.style.setProperty("--bg-grad-1", theme.bgGrad1);
-    root.style.setProperty("--bg-grad-2", theme.bgGrad2);
-    root.style.setProperty("--blob-1", theme.blob1);
-    root.style.setProperty("--blob-2", theme.blob2);
-  }
-
-  function renderHero(content) {
-    fillText("heroEyebrow", content.hero.eyebrow);
-    fillText("heroTitle", content.hero.title);
-    fillText("heroSubtitle", content.hero.subtitle);
-    fillLink("primaryCta", content.hero.primaryCtaLabel, content.hero.primaryCtaUrl);
-    fillLink("secondaryCta", content.hero.secondaryCtaLabel, content.hero.secondaryCtaUrl);
-    fillImage("heroMainImage", content.hero.image);
+  function renderStory(c) {
+    const story = c.story || {};
+    fillText("storyTitle", story.title);
+    fillText("storyVision", story.vision);
+    fillText("storyMission", story.mission);
+    fillImage("storyImg", story.image);
+    const host = $("timeline");
+    if (!host) return;
+    host.innerHTML = "";
+    (story.timeline || []).forEach((item, i) => {
+      const div = document.createElement("div");
+      div.className = "timeline-item animate-on-scroll";
+      div.style.transitionDelay = `${i * 0.15}s`;
+      div.innerHTML = `<h4>${item.year || ""} — ${item.title || ""}</h4><p>${item.description || ""}</p>`;
+      host.appendChild(div);
+    });
   }
 
   function createServiceMedia(service, index) {
     const media = document.createElement("div");
     media.className = "service-media";
-
-    const mediaType = service.mediaType === "video" ? "video" : "image";
-    const mediaUrl = service.image || SERVICE_IMAGE_FALLBACKS[index % SERVICE_IMAGE_FALLBACKS.length];
-    const altText = service.title ? `Illustration ${service.title}` : "Illustration service";
-
-    if (mediaType === "video") {
-      const video = document.createElement("video");
-      video.className = "service-image";
-      video.src = mediaUrl;
-      video.autoplay = true;
-      video.loop = true;
-      video.muted = true;
-      video.playsInline = true;
-      video.controls = true;
-      media.appendChild(video);
+    const url = service.image || SERVICE_IMAGE_FALLBACKS[index % SERVICE_IMAGE_FALLBACKS.length];
+    if (service.mediaType === "video") {
+      const v = document.createElement("video");
+      v.className = "service-image"; v.src = url; v.autoplay = true; v.loop = true; v.muted = true; v.playsInline = true;
+      media.appendChild(v);
     } else {
-      const image = document.createElement("img");
-      image.className = "service-image";
-      image.src = mediaUrl;
-      image.alt = altText;
-      media.appendChild(image);
+      const img = document.createElement("img");
+      img.className = "service-image"; img.src = url; img.alt = service.title || "Service";
+      media.appendChild(img);
     }
-
     const icon = document.createElement("span");
-    icon.className = "service-icon";
-    icon.textContent = service.icon || "💻";
+    icon.className = "service-icon"; icon.textContent = service.icon || "💻";
     media.appendChild(icon);
-
     return media;
   }
 
-  function renderServices(content) {
-    const host = document.getElementById("serviceGrid");
-    if (!host) {
-      return;
-    }
+  function renderServices(c) {
+    const host = $("serviceGrid");
+    if (!host) return;
     host.innerHTML = "";
-
-    (content.services || []).forEach((service, index) => {
+    (c.services || []).forEach((s, i) => {
       const card = document.createElement("article");
       card.className = "service-card animate-on-scroll";
-      card.style.animationDelay = `${index * 0.15}s`;
-
+      card.style.transitionDelay = `${i * 0.1}s`;
       const title = document.createElement("h3");
-      title.textContent = service.title || "";
-
-      const points = Array.isArray(service.points)
-        ? service.points
-        : String(service.description || "")
-            .split("|")
-            .map((point) => point.trim())
-            .filter(Boolean);
-
-      card.appendChild(createServiceMedia(service, index));
+      title.textContent = s.title || "";
+      const points = Array.isArray(s.points) ? s.points : [];
+      card.appendChild(createServiceMedia(s, i));
       card.appendChild(title);
-
       if (points.length > 0) {
-        const list = document.createElement("ul");
-        list.className = "service-points";
-        points.forEach((point) => {
-          const item = document.createElement("li");
-          item.textContent = point;
-          list.appendChild(item);
-        });
-        card.appendChild(list);
+        const ul = document.createElement("ul");
+        ul.className = "service-points";
+        points.forEach(p => { const li = document.createElement("li"); li.textContent = p; ul.appendChild(li); });
+        card.appendChild(ul);
       }
-
       host.appendChild(card);
     });
   }
 
-  function renderPortfolio(content) {
-    const host = document.getElementById("portfolioGrid");
-    if (!host) {
-      return;
-    }
+  function renderPortfolio(c) {
+    const host = $("portfolioGrid");
+    const filtersHost = $("portfolioFilters");
+    if (!host) return;
     host.innerHTML = "";
+    const items = c.portfolio || [];
 
-    (content.portfolio || []).forEach((item, index) => {
+    // Filters
+    if (filtersHost) {
+      filtersHost.innerHTML = "";
+      const cats = ["Tous", ...new Set(items.map(i => i.category).filter(Boolean))];
+      cats.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.textContent = cat;
+        if (cat === "Tous") btn.classList.add("active");
+        btn.addEventListener("click", () => {
+          filtersHost.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          host.querySelectorAll(".portfolio-card").forEach(card => {
+            card.style.display = (cat === "Tous" || card.dataset.category === cat) ? "" : "none";
+          });
+        });
+        filtersHost.appendChild(btn);
+      });
+    }
+
+    items.forEach((item, i) => {
       const card = document.createElement("article");
       card.className = "portfolio-card animate-on-scroll";
-      card.style.animationDelay = `${index * 0.15}s`;
+      card.style.transitionDelay = `${i * 0.1}s`;
+      card.dataset.category = item.category || "";
 
       const media = document.createElement("div");
       media.className = "portfolio-media";
-
       if (item.type === "video") {
-        const video = document.createElement("video");
-        video.src = item.mediaUrl;
-        video.autoplay = true;
-        video.loop = true;
-        video.muted = true;
-        video.playsInline = true;
-        video.controls = true;
-        media.appendChild(video);
+        const v = document.createElement("video");
+        v.src = item.mediaUrl; v.autoplay = true; v.loop = true; v.muted = true; v.playsInline = true;
+        media.appendChild(v);
       } else {
         const img = document.createElement("img");
-        img.src = item.mediaUrl;
-        img.alt = item.title || "Portfolio image";
+        img.src = item.mediaUrl; img.alt = item.title || "Portfolio";
         media.appendChild(img);
       }
 
-      const contentDiv = document.createElement("div");
-      contentDiv.className = "portfolio-content";
+      const content = document.createElement("div");
+      content.className = "portfolio-content";
+      content.innerHTML = `
+        <h3 class="portfolio-title">${item.title || "Projet"}</h3>
+        <p class="portfolio-desc">${item.description || ""}</p>
+      `;
 
-      const title = document.createElement("h3");
-      title.className = "portfolio-title";
-      title.textContent = item.title || "Projet Sans Titre";
-
-      const desc = document.createElement("p");
-      desc.className = "portfolio-desc";
-      desc.textContent = item.description || "";
-
-      contentDiv.appendChild(title);
-      contentDiv.appendChild(desc);
+      // Tags
+      const techs = Array.isArray(item.technologies) ? item.technologies : [];
+      if (techs.length > 0) {
+        const tags = document.createElement("div");
+        tags.className = "portfolio-tags";
+        techs.forEach(t => { const span = document.createElement("span"); span.textContent = t; tags.appendChild(span); });
+        content.appendChild(tags);
+      }
 
       card.appendChild(media);
-      card.appendChild(contentDiv);
+      card.appendChild(content);
+
+      // Lightbox
+      card.addEventListener("click", () => {
+        const lb = $("lightbox"), lbImg = $("lightboxImg");
+        if (lb && lbImg && item.mediaUrl) {
+          lbImg.src = item.mediaUrl;
+          lb.classList.add("active");
+        }
+      });
 
       host.appendChild(card);
     });
   }
 
-  function renderContact(content) {
-    fillText("contactTitle", content.contact.title);
-    fillText("contactText", content.contact.text);
-    fillText("contactPhone", content.contact.phone);
-    fillText("contactEmail", content.contact.email);
-    fillText("contactWebsite", content.contact.website);
-    fillText("contactAddress", content.contact.address);
-    fillText("footerText", content.footerText);
-    fillText("footerPhone", content.contact.phone);
-    fillText("footerEmail", content.contact.email);
-    fillText("footerWebsite", content.contact.website);
+  function renderContact(c) {
+    fillText("contactTitle", c.contact.title);
+    fillText("contactText", c.contact.text);
+    fillText("contactPhone", c.contact.phone);
+    fillText("contactEmail", c.contact.email);
+    fillText("contactWebsite", c.contact.website);
+    fillText("contactAddress", c.contact.address);
+    fillText("footerText", c.footerText);
+    fillText("footerPhone", c.contact.phone);
+    fillText("footerEmail", c.contact.email);
+    fillText("footerWebsite", c.contact.website);
+  }
+
+  function renderWhatsApp(c) {
+    const wa = c.whatsapp || {};
+    const bubble = $("whatsappBubble");
+    if (!bubble) return;
+    if (wa.enabled && wa.number) {
+      const msg = encodeURIComponent(wa.message || "Bonjour !");
+      bubble.href = `https://wa.me/${wa.number}?text=${msg}`;
+      bubble.style.display = "grid";
+    } else {
+      bubble.style.display = "none";
+    }
+  }
+
+  function renderSocials(c) {
+    const host = $("footerSocials");
+    if (!host) return;
+    host.innerHTML = "";
+    const socials = c.socials || {};
+    const icons = { facebook: "📘", instagram: "📷", twitter: "🐦", linkedin: "💼", tiktok: "🎵" };
+    Object.entries(socials).forEach(([key, url]) => {
+      if (!url) return;
+      const a = document.createElement("a");
+      a.href = url; a.target = "_blank"; a.rel = "noopener"; a.title = key; a.textContent = icons[key] || "🔗";
+      host.appendChild(a);
+    });
+  }
+
+  function setupHamburger() {
+    const btn = $("hamburgerBtn"), menu = $("mainMenu");
+    if (!btn || !menu) return;
+    btn.addEventListener("click", () => {
+      btn.classList.toggle("active");
+      menu.classList.toggle("mobile-open");
+    });
+    menu.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => {
+        btn.classList.remove("active");
+        menu.classList.remove("mobile-open");
+      });
+    });
+  }
+
+  function setupLightbox() {
+    const lb = $("lightbox"), closeBtn = $("lightboxClose");
+    if (!lb || !closeBtn) return;
+    closeBtn.addEventListener("click", () => lb.classList.remove("active"));
+    lb.addEventListener("click", (e) => { if (e.target === lb) lb.classList.remove("active"); });
+  }
+
+  function setupContactForm() {
+    const form = $("contactForm");
+    if (!form) return;
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const status = $("formStatus");
+      const data = {
+        name: $("formName").value.trim(),
+        email: $("formEmail").value.trim(),
+        phone: $("formPhone").value.trim(),
+        message: $("formMessage").value.trim()
+      };
+      if (!data.name || !data.email || !data.message) return;
+      try {
+        if (window.CMS_API && window.CMS_API.isSupabaseEnabled()) {
+          const client = window.supabase.createClient(window.CMS_CONFIG.supabase.url, window.CMS_CONFIG.supabase.anonKey);
+          await client.from("contact_messages").insert([data]);
+        }
+        if (status) { status.textContent = "✅ Message envoyé avec succès !"; status.style.display = "block"; status.style.color = "var(--green)"; }
+        form.reset();
+      } catch (err) {
+        if (status) { status.textContent = "❌ Erreur lors de l'envoi."; status.style.display = "block"; status.style.color = "var(--red)"; }
+      }
+    });
   }
 
   function initAnimations() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          // Optional: unobserve if we only want it to animate once
+          entry.target.classList.add("is-visible");
           observer.unobserve(entry.target);
         }
       });
-    }, {
-      threshold: 0.1,
-      rootMargin: "0px 0px -50px 0px"
+    }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+    document.querySelectorAll(".animate-on-scroll").forEach(el => observer.observe(el));
+  }
+
+  function initGSAP() {
+    if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Hero parallax
+    gsap.to(".hero-visual", { y: -60, scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 1 } });
+
+    // Section reveals
+    gsap.utils.toArray(".section-title, .section-kicker, .section-text").forEach(el => {
+      gsap.from(el, { opacity: 0, y: 30, duration: 0.8, ease: "power3.out",
+        scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play none none none" }
+      });
     });
 
-    document.querySelectorAll('.animate-on-scroll').forEach(el => {
-      observer.observe(el);
+    // Service cards stagger
+    ScrollTrigger.batch(".service-card", {
+      onEnter: (batch) => gsap.to(batch, { opacity: 1, y: 0, stagger: 0.12, duration: 0.6, ease: "back.out(1.2)" }),
+      start: "top 88%"
+    });
+
+    // Portfolio cards stagger
+    ScrollTrigger.batch(".portfolio-card", {
+      onEnter: (batch) => gsap.to(batch, { opacity: 1, y: 0, stagger: 0.12, duration: 0.6, ease: "back.out(1.2)" }),
+      start: "top 88%"
+    });
+
+    // Timeline items
+    ScrollTrigger.batch(".timeline-item", {
+      onEnter: (batch) => gsap.to(batch, { opacity: 1, x: 0, stagger: 0.15, duration: 0.7, ease: "power3.out" }),
+      start: "top 90%"
+    });
+
+    // 3D tilt on service cards
+    document.querySelectorAll(".service-card, .portfolio-card").forEach(card => {
+      card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        gsap.to(card, { rotateY: x * 10, rotateX: -y * 10, duration: 0.3, ease: "power2.out", transformPerspective: 800 });
+      });
+      card.addEventListener("mouseleave", () => {
+        gsap.to(card, { rotateY: 0, rotateX: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" });
+      });
     });
   }
 
   async function init() {
     const content = await getContent();
-    applyTheme(content);
     applyBranding(content);
     applyNavigation(content);
     renderHero(content);
+    renderStory(content);
     renderServices(content);
     renderPortfolio(content);
     renderContact(content);
-    
-    // Initialize scroll animations after DOM is updated
+    renderWhatsApp(content);
+    renderSocials(content);
+    setupHamburger();
+    setupLightbox();
+    setupContactForm();
     requestAnimationFrame(() => {
       initAnimations();
+      initGSAP();
     });
   }
 
