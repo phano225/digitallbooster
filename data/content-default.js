@@ -53,31 +53,31 @@ window.DIGITALL_DEFAULT_CONTENT = {
   services: [
     {
       icon: "💻",
-      title: "Développement Web",
+      title: "Développement de site internet",
       mediaType: "image",
       image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
-      points: ["Sites Vitrines", "Applications SaaS", "Plateformes E-commerce"]
+      points: ["Sites Vitrines", "Plateformes E-commerce", "Portails sur-mesure"]
     },
     {
       icon: "📱",
-      title: "Applications Mobiles",
+      title: "Applications Android et iOS",
       mediaType: "image",
       image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=1200&q=80",
       points: ["Développement iOS", "Développement Android", "Apps React Native / Flutter"]
     },
     {
-      icon: "🎨",
-      title: "UI / UX Design",
+      icon: "🚀",
+      title: "Progressive Web Apps (PWA)",
       mediaType: "image",
       image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1200&q=80",
-      points: ["Maquettes interactives", "Parcours utilisateurs", "Identité visuelle"]
+      points: ["Performances optimales", "Installation mobile simple", "Mode hors-ligne"]
     },
     {
       icon: "⚙️",
-      title: "Maintenance & DevOps",
+      title: "SaaS & MVP",
       mediaType: "image",
       image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
-      points: ["Hébergement Cloud", "Mise à jour sécurisée", "Intégration continue"]
+      points: ["Architecture Cloud", "Minimum Viable Product", "Scalabilité garantie"]
     }
   ],
   portfolio: [
