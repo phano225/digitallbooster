@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   
   // Site Content state
   const [content, setContent] = useState<SiteContent>({
@@ -122,6 +123,49 @@ export default function AdminDashboard() {
     }));
   };
 
+  // Upload portfolio image directly to Supabase Storage Bucket
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingIdx(idx);
+      setError(null);
+
+      // Generate a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // Upload file to Supabase Storage Bucket 'portfolio'
+      const { error: uploadError } = await supabase.storage
+        .from('portfolio')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('portfolio')
+        .getPublicUrl(filePath);
+
+      const publicUrl = data.publicUrl;
+
+      // Update state
+      const next = [...(content.portfolio || [])];
+      next[idx] = { ...next[idx], image: publicUrl };
+      setContent(prev => ({ ...prev, portfolio: next }));
+    } catch (err: any) {
+      console.error("Error uploading image:", err);
+      setError("Erreur de téléversement : " + (err.message || "Impossible d'envoyer l'image."));
+    } finally {
+      setUploadingIdx(null);
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-[#FCFCFD] text-zinc-900 font-sans pb-16">
       {/* Background patterns */}
@@ -133,371 +177,421 @@ export default function AdminDashboard() {
 
       {/* Header bar */}
       <header className="sticky top-0 w-full z-40 bg-white/70 backdrop-blur-xl border-b border-zinc-100 py-4.5 shadow-sm">
-        <div className="container mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link 
-              href="/" 
-              className="p-2 border border-zinc-200 rounded-xl hover:bg-zinc-50 hover:border-zinc-300 transition-all text-zinc-500 hover:text-zinc-950 flex items-center justify-center shadow-sm"
+              href="/"
+              className="p-2 border border-zinc-200 rounded-xl bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all text-zinc-500 hover:text-zinc-950"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <div className="flex flex-col">
-              <h1 className="text-sm font-black uppercase tracking-[0.2em] text-zinc-950 flex items-center gap-2">
+            <div>
+              <h1 className="text-xs font-black uppercase tracking-widest text-zinc-950 flex items-center gap-1.5 font-sans">
                 <ShieldCheck className="w-4 h-4 text-afro-blue" /> Console Admin Digitall Booster
               </h1>
-              <span className="text-[9px] tracking-[0.25em] text-afro-blue font-bold uppercase mt-0.5">
-                Système d'édition Cyber-Africain v2.5
-              </span>
+              <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest pl-5.5 mt-0.5">Système d'Édition Cyber-Africain v2.5</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            {success && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-bold font-sans"
-              >
-                <CheckCircle2 className="w-4 h-4" /> Sauvegardé avec succès !
-              </motion.div>
-            )}
-            
+            <AnimatePresence>
+              {success && (
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="hidden md:flex items-center gap-2 px-4 py-2 border border-emerald-100 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-wider rounded-xl"
+                >
+                  <CheckCircle2 className="w-4 h-4" /> Contenu sauvegardé en direct !
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <button 
               onClick={saveContent}
-              disabled={loading || saving}
-              className="px-6 py-3.5 bg-gradient-to-r from-afro-blue to-blue-600 text-white text-xs font-black uppercase tracking-wider rounded-full shadow-lg shadow-blue-500/15 hover:shadow-blue-500/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 transition-all flex items-center gap-2"
+              disabled={saving || loading}
+              className="px-6 py-3 bg-gradient-to-r from-afro-blue to-[#003BFF] text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:shadow-[0_4px_20px_rgba(0,82,255,0.25)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-55 disabled:pointer-events-none transition-all flex items-center gap-2"
             >
-              <Save className="w-3.5 h-3.5" />
-              {saving ? "Sauvegarde..." : "Enregistrer"}
+              {saving ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Enregistrement...
+                </>
+              ) : (
+                <>
+                  <Save className="w-3.5 h-3.5" /> Enregistrer
+                </>
+              )}
             </button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 mt-10 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Sidebar Info & Stats */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
+      {/* Main Admin UI */}
+      <main className="max-w-7xl mx-auto px-6 mt-10 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* System Status */}
-          <div className="glass-light p-6 rounded-3xl shadow-sm border-[#0052FF]/10 relative overflow-hidden group">
-            {/* Tiny Holo circle decoration */}
-            <div className="absolute -top-12 -right-12 opacity-15">
-              <HoloCircle size={100} />
-            </div>
-
-            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-950 mb-5 flex items-center gap-2">
-              <Server className="w-4 h-4 text-afro-blue" /> Statut Infrastructure
-            </h3>
+          {/* Side panels */}
+          <div className="lg:col-span-4 flex flex-col gap-8">
             
-            <div className="flex flex-col gap-4">
-              {[
-                { label: "Base de données", val: "Supabase Live", icon: Database, color: "text-emerald-500" },
-                { label: "Shield de sécurité", val: "Actif (Wakanda v2)", icon: ShieldCheck, color: "text-afro-blue" },
-                { label: "Revalidation Cache", val: "Instantanée (SSR)", icon: RefreshCw, color: "text-afro-gold" }
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between border-b border-zinc-50 pb-3 last:border-b-0 last:pb-0">
-                  <div className="flex items-center gap-2">
-                    <item.icon className="w-4 h-4 text-zinc-400" />
-                    <span className="text-xs text-zinc-500 font-sans">{item.label}</span>
+            {/* Infra Status */}
+            <div className="glass-light p-6 rounded-3xl shadow-sm border-[#0052FF]/10 relative overflow-hidden">
+              <HoloCircle className="w-32 h-32 absolute top-[-10%] right-[-10%] opacity-[0.03] pointer-events-none" />
+              
+              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-950 mb-5 flex items-center gap-2">
+                <Database className="w-4 h-4 text-afro-blue" /> Statut Infrastructure
+              </h3>
+
+              <div className="flex flex-col gap-4">
+                {[
+                  { label: "Base de données", val: "Supabase Live", icon: Server, color: "text-emerald-500" },
+                  { label: "Shield de sécurité", val: "Actif (Wakanda v2)", icon: ShieldCheck, color: "text-afro-blue" },
+                  { label: "Revalidation Cache", val: "Instantanée (SSR)", icon: RefreshCw, color: "text-afro-gold" }
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between border-b border-zinc-50 pb-3 last:border-b-0 last:pb-0">
+                    <div className="flex items-center gap-2">
+                      <item.icon className="w-4 h-4 text-zinc-400" />
+                      <span className="text-xs text-zinc-500 font-sans">{item.label}</span>
+                    </div>
+                    <span className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${item.color}`}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
+                      {item.val}
+                    </span>
                   </div>
-                  <span className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${item.color}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
-                    {item.val}
-                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Metrics */}
+            <div className="glass-light p-6 rounded-3xl shadow-sm border-[#FFC700]/15 relative overflow-hidden">
+              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-950 mb-5 flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-afro-gold" /> Télémétrie Tech
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-zinc-50 border border-zinc-100 p-4.5 rounded-2xl">
+                  <span className="text-[9px] font-black uppercase text-zinc-400 tracking-wider">Services Actifs</span>
+                  <p className="text-3xl font-black text-zinc-950 mt-1 font-serif">{content.services?.length || 0}</p>
                 </div>
-              ))}
+                <div className="bg-zinc-50 border border-zinc-100 p-4.5 rounded-2xl">
+                  <span className="text-[9px] font-black uppercase text-zinc-400 tracking-wider">Projets Portfolio</span>
+                  <p className="text-3xl font-black text-zinc-950 mt-1 font-serif">{content.portfolio?.length || 0}</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Quick Metrics */}
-          <div className="glass-light p-6 rounded-3xl shadow-sm border-[#FFC700]/15 relative overflow-hidden">
-            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-950 mb-5 flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-afro-gold" /> Télémétrie Tech
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-zinc-50 border border-zinc-100 p-4.5 rounded-2xl">
-                <span className="text-[9px] font-black uppercase text-zinc-400 tracking-wider">Services Actifs</span>
-                <p className="text-3xl font-black text-zinc-950 mt-1 font-serif">{content.services?.length || 0}</p>
+          {/* Form Editor */}
+          <div className="lg:col-span-8 flex flex-col gap-8">
+            
+            {error && (
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold flex items-center gap-2.5 font-sans">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                {error}
               </div>
-              <div className="bg-zinc-50 border border-zinc-100 p-4.5 rounded-2xl">
-                <span className="text-[9px] font-black uppercase text-zinc-400 tracking-wider">Projets Portfolio</span>
-                <p className="text-3xl font-black text-zinc-950 mt-1 font-serif">{content.portfolio?.length || 0}</p>
+            )}
+
+            {loading ? (
+              <div className="glass-light p-16 rounded-3xl shadow-sm flex flex-col items-center justify-center gap-4">
+                <RefreshCw className="w-8 h-8 text-afro-blue animate-spin" />
+                <p className="text-xs uppercase tracking-widest font-black text-zinc-400">Chargement de la Console...</p>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* SECTION 1: HERO EDITING */}
+                <div className="glass-light p-8 rounded-3xl shadow-sm border-[#0052FF]/10 flex flex-col gap-6">
+                  <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                    <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-afro-blue" /> Section Hero (Accueil)
+                    </h3>
+                    <span className="text-[9px] bg-afro-blue/5 border border-[#0052FF]/15 text-afro-blue font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
+                      Dynamic Config
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Badge (Eyebrow)</label>
+                      <input 
+                        type="text" 
+                        value={content.hero?.eyebrow || ""}
+                        onChange={(e) => setContent(prev => ({
+                          ...prev, 
+                          hero: { ...(prev.hero || {}), eyebrow: e.target.value }
+                        }))}
+                        className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
+                      />
+                    </div>
+                    
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Titre Principal</label>
+                      <input 
+                        type="text" 
+                        value={content.hero?.title || ""}
+                        onChange={(e) => setContent(prev => ({
+                          ...prev, 
+                          hero: { ...(prev.hero || {}), title: e.target.value }
+                        }))}
+                        className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2 md:col-span-2">
+                      <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Description (Sous-titre)</label>
+                      <textarea 
+                        rows={3}
+                        value={content.hero?.subtitle || ""}
+                        onChange={(e) => setContent(prev => ({
+                          ...prev, 
+                          hero: { ...(prev.hero || {}), subtitle: e.target.value }
+                        }))}
+                        className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans leading-relaxed resize-none"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Bouton Principal</label>
+                      <input 
+                        type="text" 
+                        value={content.hero?.primaryCtaLabel || ""}
+                        onChange={(e) => setContent(prev => ({
+                          ...prev, 
+                          hero: { ...(prev.hero || {}), primaryCtaLabel: e.target.value }
+                        }))}
+                        className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Bouton Secondaire</label>
+                      <input 
+                        type="text" 
+                        value={content.hero?.secondaryCtaLabel || ""}
+                        onChange={(e) => setContent(prev => ({
+                          ...prev, 
+                          hero: { ...(prev.hero || {}), secondaryCtaLabel: e.target.value }
+                        }))}
+                        className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* SECTION 2: SERVICES EDITING */}
+                <div className="glass-light p-8 rounded-3xl shadow-sm border-[#FFC700]/15 flex flex-col gap-6">
+                  <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                    <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-afro-gold" /> Expertises & Services
+                    </h3>
+                    <button 
+                      onClick={addService}
+                      className="px-4 py-2 bg-gradient-to-r from-afro-blue/10 to-afro-blue/15 border border-[#0052FF]/15 text-afro-blue text-[10px] font-black uppercase tracking-wider rounded-full hover:bg-[#0052FF]/20 transition-all flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Ajouter
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-6">
+                    {content.services?.map((service, idx) => (
+                      <div key={idx} className="bg-zinc-50 border border-zinc-100 p-6 rounded-2xl relative group">
+                        <button 
+                          onClick={() => removeService(idx)}
+                          className="absolute top-4 right-4 p-2 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-100 transition-all text-rose-500 opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="flex flex-col gap-1.5 col-span-2">
+                            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Titre du Service</label>
+                            <input 
+                              type="text" 
+                              value={service.title || ""}
+                              onChange={(e) => {
+                                const next = [...(content.services || [])];
+                                next[idx] = { ...service, title: e.target.value };
+                                setContent(prev => ({ ...prev, services: next }));
+                              }}
+                              className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans font-bold"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1.5 col-span-2">
+                            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Description</label>
+                            <textarea 
+                              rows={2}
+                              value={service.description || ""}
+                              onChange={(e) => {
+                                const next = [...(content.services || [])];
+                                next[idx] = { ...service, description: e.target.value };
+                                setContent(prev => ({ ...prev, services: next }));
+                              }}
+                              className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans leading-relaxed resize-none"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1.5 col-span-2">
+                            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Avantages / Points clés (Séparés par des virgules)</label>
+                            <input 
+                              type="text" 
+                              value={service.points?.join(", ") || ""}
+                              onChange={(e) => {
+                                const next = [...(content.services || [])];
+                                next[idx] = { ...service, points: e.target.value.split(",").map(p => p.trim()) };
+                                setContent(prev => ({ ...prev, services: next }));
+                              }}
+                              className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* SECTION 3: PORTFOLIO EDITING */}
+                <div className="glass-light p-8 rounded-3xl shadow-sm border-[#0052FF]/10 flex flex-col gap-6">
+                  <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                    <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-afro-blue" /> Portfolio Réalisations
+                    </h3>
+                    <button 
+                      onClick={addPortfolio}
+                      className="px-4 py-2 bg-gradient-to-r from-afro-blue/10 to-afro-blue/15 border border-[#0052FF]/15 text-afro-blue text-[10px] font-black uppercase tracking-wider rounded-full hover:bg-[#0052FF]/20 transition-all flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Ajouter
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-6">
+                    {content.portfolio?.map((project, idx) => (
+                      <div key={idx} className="bg-zinc-50 border border-zinc-100 p-6 rounded-2xl relative group">
+                        <button 
+                          onClick={() => removePortfolio(idx)}
+                          className="absolute top-4 right-4 p-2 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-100 transition-all text-rose-500 opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="flex flex-col gap-1.5 col-span-2">
+                            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Nom de la réalisation</label>
+                            <input 
+                              type="text" 
+                              value={project.title || ""}
+                              onChange={(e) => {
+                                const next = [...(content.portfolio || [])];
+                                next[idx] = { ...project, title: e.target.value };
+                                setContent(prev => ({ ...prev, portfolio: next }));
+                              }}
+                              className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans font-bold"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Catégorie</label>
+                            <input 
+                              type="text" 
+                              value={project.category || ""}
+                              onChange={(e) => {
+                                const next = [...(content.portfolio || [])];
+                                next[idx] = { ...project, category: e.target.value };
+                                setContent(prev => ({ ...prev, portfolio: next }));
+                              }}
+                              className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-2 col-span-2">
+                            <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Image de la réalisation</label>
+                            
+                            <div className="flex flex-col sm:flex-row gap-4 items-center bg-zinc-50 p-4 border border-zinc-200 rounded-2xl">
+                              {/* Preview Thumbnail */}
+                              <div className="relative w-16 h-16 bg-white border border-zinc-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
+                                {project.image ? (
+                                  <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+                                ) : (
+                                  <Globe className="w-5 h-5 text-zinc-300" />
+                                )}
+                                
+                                {uploadingIdx === idx && (
+                                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                                    <RefreshCw className="w-5 h-5 text-afro-blue animate-spin" />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Uploader Actions */}
+                              <div className="flex-1 flex flex-col gap-2.5 w-full">
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                  <label 
+                                    htmlFor={`file-${idx}`}
+                                    className="px-4 py-3 bg-white border border-zinc-200 text-zinc-800 text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-zinc-50 hover:border-zinc-300 transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 shadow-sm"
+                                  >
+                                    {uploadingIdx === idx ? "Envoi..." : "Téléverser"}
+                                  </label>
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    id={`file-${idx}`}
+                                    onChange={(e) => handleImageUpload(e, idx)}
+                                    className="hidden" 
+                                    disabled={uploadingIdx !== null}
+                                  />
+                                  
+                                  <input 
+                                    type="text" 
+                                    placeholder="Ou coller une URL d'image..."
+                                    value={project.image || ""}
+                                    onChange={(e) => {
+                                      const next = [...(content.portfolio || [])];
+                                      next[idx] = { ...project, image: e.target.value };
+                                      setContent(prev => ({ ...prev, portfolio: next }));
+                                    }}
+                                    className="flex-1 bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans shadow-sm"
+                                  />
+                                </div>
+                                <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest block pl-1">
+                                  Stocké directement dans votre bucket Supabase public "portfolio"
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1.5 col-span-2">
+                            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Description</label>
+                            <textarea 
+                              rows={2}
+                              value={project.description || ""}
+                              onChange={(e) => {
+                                const next = [...(content.portfolio || [])];
+                                next[idx] = { ...project, description: e.target.value };
+                                setContent(prev => ({ ...prev, portfolio: next }));
+                              }}
+                              className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans leading-relaxed resize-none"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1.5 col-span-2">
+                            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Tags Technologiques (Séparés par des virgules)</label>
+                            <input 
+                              type="text" 
+                              value={project.tags?.join(", ") || ""}
+                              onChange={(e) => {
+                                const next = [...(content.portfolio || [])];
+                                next[idx] = { ...project, tags: e.target.value.split(",").map(t => t.trim()) };
+                                setContent(prev => ({ ...prev, portfolio: next }));
+                              }}
+                              className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
           </div>
-        </div>
-
-        {/* Form Editor */}
-        <div className="lg:col-span-8 flex flex-col gap-8">
-          
-          {error && (
-            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold flex items-center gap-2.5 font-sans">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="glass-light p-16 rounded-3xl shadow-sm flex flex-col items-center justify-center gap-4">
-              <RefreshCw className="w-8 h-8 text-afro-blue animate-spin" />
-              <p className="text-xs uppercase tracking-widest font-black text-zinc-400">Chargement de la Console...</p>
-            </div>
-          ) : (
-            <>
-              {/* SECTION 1: HERO EDITING */}
-              <div className="glass-light p-8 rounded-3xl shadow-sm border-[#0052FF]/10 flex flex-col gap-6">
-                <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-afro-blue" /> Section Hero (Accueil)
-                  </h3>
-                  <span className="text-[9px] bg-afro-blue/5 border border-[#0052FF]/15 text-afro-blue font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
-                    Dynamic Config
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Badge (Eyebrow)</label>
-                    <input 
-                      type="text" 
-                      value={content.hero?.eyebrow || ""}
-                      onChange={(e) => setContent(prev => ({
-                        ...prev, 
-                        hero: { ...(prev.hero || {}), eyebrow: e.target.value }
-                      }))}
-                      className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
-                    />
-                  </div>
-                  
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Titre Principal</label>
-                    <input 
-                      type="text" 
-                      value={content.hero?.title || ""}
-                      onChange={(e) => setContent(prev => ({
-                        ...prev, 
-                        hero: { ...(prev.hero || {}), title: e.target.value }
-                      }))}
-                      className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2 md:col-span-2">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Description (Sous-titre)</label>
-                    <textarea 
-                      rows={3}
-                      value={content.hero?.subtitle || ""}
-                      onChange={(e) => setContent(prev => ({
-                        ...prev, 
-                        hero: { ...(prev.hero || {}), subtitle: e.target.value }
-                      }))}
-                      className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans leading-relaxed resize-none"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Bouton Principal</label>
-                    <input 
-                      type="text" 
-                      value={content.hero?.primaryCtaLabel || ""}
-                      onChange={(e) => setContent(prev => ({
-                        ...prev, 
-                        hero: { ...(prev.hero || {}), primaryCtaLabel: e.target.value }
-                      }))}
-                      className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Bouton Secondaire</label>
-                    <input 
-                      type="text" 
-                      value={content.hero?.secondaryCtaLabel || ""}
-                      onChange={(e) => setContent(prev => ({
-                        ...prev, 
-                        hero: { ...(prev.hero || {}), secondaryCtaLabel: e.target.value }
-                      }))}
-                      className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3.5 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 2: SERVICES EDITING */}
-              <div className="glass-light p-8 rounded-3xl shadow-sm border-[#FFC700]/15 flex flex-col gap-6">
-                <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2">
-                    <Smartphone className="w-4 h-4 text-afro-gold" /> Expertises & Services
-                  </h3>
-                  <button 
-                    onClick={addService}
-                    className="px-4 py-2 bg-gradient-to-r from-afro-blue/10 to-afro-blue/15 border border-[#0052FF]/15 text-afro-blue text-[10px] font-black uppercase tracking-wider rounded-full hover:bg-[#0052FF]/20 transition-all flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Ajouter
-                  </button>
-                </div>
-
-                <div className="flex flex-col gap-6">
-                  {content.services?.map((service, idx) => (
-                    <div key={idx} className="bg-zinc-50 border border-zinc-100 p-6 rounded-2xl relative group">
-                      <button 
-                        onClick={() => removeService(idx)}
-                        className="absolute top-4 right-4 p-2 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-100 transition-all text-rose-500 opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1.5 col-span-2">
-                          <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Titre du Service</label>
-                          <input 
-                            type="text" 
-                            value={service.title || ""}
-                            onChange={(e) => {
-                              const next = [...(content.services || [])];
-                              next[idx] = { ...service, title: e.target.value };
-                              setContent(prev => ({ ...prev, services: next }));
-                            }}
-                            className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans font-bold"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5 col-span-2">
-                          <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Description</label>
-                          <textarea 
-                            rows={2}
-                            value={service.description || ""}
-                            onChange={(e) => {
-                              const next = [...(content.services || [])];
-                              next[idx] = { ...service, description: e.target.value };
-                              setContent(prev => ({ ...prev, services: next }));
-                            }}
-                            className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans leading-relaxed resize-none"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5 col-span-2">
-                          <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Avantages / Points clés (Séparés par des virgules)</label>
-                          <input 
-                            type="text" 
-                            value={service.points?.join(", ") || ""}
-                            onChange={(e) => {
-                              const next = [...(content.services || [])];
-                              next[idx] = { ...service, points: e.target.value.split(",").map(p => p.trim()) };
-                              setContent(prev => ({ ...prev, services: next }));
-                            }}
-                            className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* SECTION 3: PORTFOLIO EDITING */}
-              <div className="glass-light p-8 rounded-3xl shadow-sm border-[#0052FF]/10 flex flex-col gap-6">
-                <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-afro-blue" /> Portfolio Réalisations
-                  </h3>
-                  <button 
-                    onClick={addPortfolio}
-                    className="px-4 py-2 bg-gradient-to-r from-afro-blue/10 to-afro-blue/15 border border-[#0052FF]/15 text-afro-blue text-[10px] font-black uppercase tracking-wider rounded-full hover:bg-[#0052FF]/20 transition-all flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Ajouter
-                  </button>
-                </div>
-
-                <div className="flex flex-col gap-6">
-                  {content.portfolio?.map((project, idx) => (
-                    <div key={idx} className="bg-zinc-50 border border-zinc-100 p-6 rounded-2xl relative group">
-                      <button 
-                        onClick={() => removePortfolio(idx)}
-                        className="absolute top-4 right-4 p-2 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-100 transition-all text-rose-500 opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1.5 col-span-2">
-                          <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Nom de la réalisation</label>
-                          <input 
-                            type="text" 
-                            value={project.title || ""}
-                            onChange={(e) => {
-                              const next = [...(content.portfolio || [])];
-                              next[idx] = { ...project, title: e.target.value };
-                              setContent(prev => ({ ...prev, portfolio: next }));
-                            }}
-                            className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans font-bold"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Catégorie</label>
-                          <input 
-                            type="text" 
-                            value={project.category || ""}
-                            onChange={(e) => {
-                              const next = [...(content.portfolio || [])];
-                              next[idx] = { ...project, category: e.target.value };
-                              setContent(prev => ({ ...prev, portfolio: next }));
-                            }}
-                            className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Image URL</label>
-                          <input 
-                            type="text" 
-                            value={project.image || ""}
-                            onChange={(e) => {
-                              const next = [...(content.portfolio || [])];
-                              next[idx] = { ...project, image: e.target.value };
-                              setContent(prev => ({ ...prev, portfolio: next }));
-                            }}
-                            className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5 col-span-2">
-                          <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Description</label>
-                          <textarea 
-                            rows={2}
-                            value={project.description || ""}
-                            onChange={(e) => {
-                              const next = [...(content.portfolio || [])];
-                              next[idx] = { ...project, description: e.target.value };
-                              setContent(prev => ({ ...prev, portfolio: next }));
-                            }}
-                            className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans leading-relaxed resize-none"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5 col-span-2">
-                          <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Tags Technologiques (Séparés par des virgules)</label>
-                          <input 
-                            type="text" 
-                            value={project.tags?.join(", ") || ""}
-                            onChange={(e) => {
-                              const next = [...(content.portfolio || [])];
-                              next[idx] = { ...project, tags: e.target.value.split(",").map(t => t.trim()) };
-                              setContent(prev => ({ ...prev, portfolio: next }));
-                            }}
-                            className="bg-white border border-zinc-200 rounded-xl px-4.5 py-3 text-xs text-zinc-950 focus:outline-none focus:border-[#0052FF]/30 font-sans"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
         </div>
       </main>
     </div>
