@@ -3,77 +3,111 @@ import Footer from "@/components/layout/Footer";
 import Hero from "@/components/sections/Hero";
 import Expertises from "@/components/sections/Expertises";
 import Portfolio from "@/components/sections/Portfolio";
+import Loader from "@/components/ui/Loader";
 import { getSiteContent } from "@/lib/data";
 import { ArrowRight, Zap, Shield, Cpu } from "lucide-react";
+import { AfroGrid, TribalDivider } from "@/components/ui/AfroPatterns";
 
 // Configure dynamic fetching so edits show live. 
 export const revalidate = 0; 
 
 export default async function Home() {
-  // 1. Fetch Data Server-Side Directly from Supabase
+  // Fetch Data Server-Side Directly from Supabase
   const content = await getSiteContent();
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full bg-white">
+      {/* Immersive Loading Screen */}
+      <Loader />
+
       <Navbar />
       
-      {/* Pass dynamic content to Hero with graceful fallbacks baked in */}
+      {/* Hero section */}
       <Hero data={content?.hero} />
 
-      {/* Inject live dynamic expertises */}
+      <TribalDivider color="text-afro-blue/10" />
+
+      {/* Expertises (Services) */}
       <Expertises data={content?.services as any} />
 
-      {/* Feed Supabase list straight to dynamic Portfolio */}
+      <TribalDivider color="text-afro-gold/15" />
+
+      {/* Portfolio section */}
       <Portfolio data={content?.portfolio} />
 
+      <TribalDivider color="text-afro-blue/10" />
+
       {/* Pre-Show Features Grid */}
-      <section id="features" className="relative py-20 border-t border-white/5 bg-black/20 backdrop-blur-md">
-        <div className="container mx-auto px-6">
+      <section id="features" className="relative py-28 bg-[#FCFCFD] overflow-hidden">
+        {/* Background micro grid */}
+        <AfroGrid className="opacity-[0.02]" />
+
+        <div className="container mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 icon: Zap,
                 title: "Ultra-Performance",
-                desc: "Optimisé pour atteindre 100/100 aux scores Core Web Vitals.",
-                color: "text-afro-green"
+                desc: "Optimisé pour atteindre 100/100 aux scores Google Core Web Vitals.",
+                color: "text-afro-blue",
+                bg: "bg-[#0052FF]/5 border-[#0052FF]/10"
               },
               {
                 icon: Shield,
                 title: "Sécurité Maximale",
-                desc: "Protocoles cloud-native avancés protégeant vos données sensibles.",
-                color: "text-afro-orange"
+                desc: "Protocoles cloud-native avancés et cryptage de pointe de vos données.",
+                color: "text-afro-gold",
+                bg: "bg-[#FFC700]/5 border-[#FFC700]/15"
               },
               {
                 icon: Cpu,
                 title: "Architecture Moderne",
-                desc: "Bâti sur une stack Server-side évolutive prête pour l'international.",
-                color: "text-afro-gold"
+                desc: "Bâti sur une stack serverless hautement évolutive prête pour l'international.",
+                color: "text-afro-blue",
+                bg: "bg-[#0052FF]/5 border-[#0052FF]/10"
               }
             ].map((feat, idx) => (
-              <div key={idx} className="group p-8 bg-white/5 border border-white/10 rounded-2xl transition-all hover:bg-white/[0.08] hover:border-white/20">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-white/5 mb-6 ${feat.color}`}>
-                  <feat.icon className="w-6 h-6" />
+              <div 
+                key={idx} 
+                className="group p-8 bg-white border border-zinc-100 rounded-3xl transition-all duration-300 hover:border-[#0052FF]/20 hover:shadow-xl hover:shadow-[#0052FF]/5 tribal-border-glow"
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${feat.bg} mb-6 transform transition-transform group-hover:scale-110`}>
+                  <feat.icon className={`w-5 h-5 ${feat.color}`} />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{feat.title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">{feat.desc}</p>
+                <h3 className="text-lg font-bold text-zinc-950 mb-3 font-sans group-hover:text-afro-blue transition-colors">
+                  {feat.title}
+                </h3>
+                <p className="text-zinc-500 text-sm leading-relaxed font-sans">{feat.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      <TribalDivider color="text-afro-gold/15" />
+
       {/* Footer / Call to action teaser */}
-      <section className="py-24 flex items-center justify-center text-center px-6 border-t border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-afro-green/5 to-transparent pointer-events-none"></div>
+      <section id="contact" className="py-32 flex items-center justify-center text-center px-6 relative overflow-hidden bg-white">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-afro-blue/5 pointer-events-none" />
+        
+        {/* Soft glowing backlight */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-afro-blue/5 rounded-full filter blur-[120px] pointer-events-none" />
+
         <div className="max-w-2xl relative z-10">
-          <h2 className="text-3xl md:text-5xl font-black font-serif mb-6 text-white">
-            Prêt à faire décoller votre projet ?
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-afro-blue/5 to-afro-blue/10 border border-[#0052FF]/10 text-afro-blue text-[10px] font-black tracking-[0.18em] uppercase mb-8 shadow-sm">
+            Prêt à Décoller
+          </div>
+          
+          <h2 className="text-3xl md:text-5xl font-black mb-6 text-zinc-950 font-sans tracking-tight leading-tight">
+            Prêt à faire décoller <br />votre vision ?
           </h2>
-          <p className="text-zinc-400 mb-10 text-lg">
-            Faites appel à l'expertise Digitall Booster et obtenez une solution digitale premium qui transforme votre business.
+          
+          <p className="text-zinc-500 mb-10 text-base md:text-lg leading-relaxed font-sans max-w-lg mx-auto">
+            Faites appel à l'excellence technologique de Digitall Booster et obtenez une solution digitale de luxe qui transforme votre croissance.
           </p>
-          <button className="px-8 py-4 rounded-full bg-white text-black font-bold hover:bg-afro-green transition-colors flex items-center gap-2 mx-auto">
-            Démarrez l'aventure <ArrowRight className="w-5 h-5" />
+          
+          <button className="px-8 py-4.5 rounded-full bg-gradient-to-r from-afro-blue to-blue-600 text-white text-xs font-black uppercase tracking-wider hover:shadow-xl hover:shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2 mx-auto shadow-lg shadow-blue-500/10">
+            Démarrer un projet <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </section>

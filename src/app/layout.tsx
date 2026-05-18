@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#070707",
+  themeColor: "#FCFCFD",
   width: "device-width",
   initialScale: 1,
 };
@@ -36,13 +36,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="scroll-smooth dark">
+    <html lang="fr" className="scroll-smooth">
       <body
-        className={`${spaceGrotesk.variable} ${inter.variable} font-sans bg-background text-foreground min-h-screen selection:bg-afro-green selection:text-black overflow-x-hidden antialiased`}
+        className={`${spaceGrotesk.variable} ${inter.variable} font-sans bg-background text-foreground min-h-screen selection:bg-afro-blue/10 selection:text-afro-blue overflow-x-hidden antialiased`}
       >
-        <div className="fixed inset-0 z-[-1] bg-african-pattern opacity-40 pointer-events-none" />
-        <div className="fixed top-0 left-1/4 w-96 h-96 bg-afro-green/10 rounded-full mix-blend-screen filter blur-[120px] animate-pulse z-[-2]" />
-        <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-afro-orange/10 rounded-full mix-blend-screen filter blur-[120px] z-[-2]" />
+        {/* Subtle tech-grid background and glowing ambient orbs */}
+        <div className="fixed inset-0 z-[-1] bg-tech-grid pointer-events-none opacity-70" />
+        <div className="fixed top-[-10%] left-[5%] w-[500px] h-[500px] bg-afro-blue/6 rounded-full filter blur-[100px] pointer-events-none z-[-2]" />
+        <div className="fixed bottom-[-10%] right-[5%] w-[600px] h-[600px] bg-afro-gold/4 rounded-full filter blur-[120px] pointer-events-none z-[-2]" />
         
         <main className="relative flex min-h-screen flex-col">
           {children}

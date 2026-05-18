@@ -4,24 +4,31 @@
   --font-sans: var(--font-space-grotesk), "Inter", system-ui, sans-serif;
   --font-serif: var(--font-space-grotesk), serif;
   
-  --color-background: #070707;
-  --color-surface: #0d0d0d;
-  --color-card: #121212;
-  --color-foreground: #FAF9F6;
+  --color-background: #FCFCFD;
+  --color-surface: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-foreground: #09090B;
   
-  --color-afro-green: #00C853;
-  --color-afro-green-dark: #008a38;
-  --color-afro-orange: #FF9800;
-  --color-afro-gold: #FFD700;
+  --color-afro-blue: #0052FF;
+  --color-afro-blue-dark: #003ECC;
+  --color-afro-gold: #FFC700;
+  --color-afro-gold-light: #FFD60A;
 
   --animate-slow-pan: background-position 20s linear infinite;
+  --animate-spin-slow: spin 25s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
 }
 
 :root {
-  --background: #070707;
-  --foreground: #FAF9F6;
+  --background: #FCFCFD;
+  --foreground: #09090B;
   --muted: #71717a;
-  --border: rgba(255, 255, 255, 0.08);
+  --border: rgba(0, 82, 255, 0.08);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 * {
@@ -41,26 +48,64 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Subtle african pattern underlay */
-.bg-african-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+/* Subtle futuristic tech grid underlay */
+.bg-tech-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 82, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 82, 255, 0.03) 1px, transparent 1px);
 }
 
-/* Gradient Texts */
+/* Premium Gradient Text */
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-afro-green to-afro-orange;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-zinc-950 via-afro-blue to-afro-gold;
 }
 
-.glow-subtle {
-  box-shadow: 0 0 40px -10px rgba(0, 200, 83, 0.2);
+.text-gradient-blue {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-afro-blue to-afro-blue-dark;
 }
 
-.glass {
-  @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-xl;
+/* Soft Neon Glowing effects */
+.glow-subtle-blue {
+  box-shadow: 0 10px 40px -10px rgba(0, 82, 255, 0.12);
+}
+
+.glow-subtle-gold {
+  box-shadow: 0 10px 40px -10px rgba(255, 199, 0, 0.15);
+}
+
+/* Premium Light Glassmorphism */
+.glass-light {
+  @apply bg-white/70 backdrop-blur-md border border-[#0052FF]/10 shadow-sm;
+}
+
+.glass-light-hover {
+  @apply hover:bg-white/90 hover:border-[#0052FF]/20 hover:shadow-md transition-all duration-300;
 }
 
 /* Selection */
 ::selection {
-  background: #00C853;
-  color: #000;
+  background: rgba(0, 82, 255, 0.1);
+  color: #0052FF;
+}
+
+/* Tribal border dynamic glow */
+.tribal-border-glow {
+  position: relative;
+}
+.tribal-border-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, rgba(0,82,255,0.4), rgba(255,199,0,0.4)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+.tribal-border-glow:hover::after {
+  opacity: 0.8;
 }
