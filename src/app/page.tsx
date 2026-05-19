@@ -62,10 +62,11 @@ export default async function Home() {
                 title: "Architecture Moderne",
                 desc: "Bâti sur une stack serverless hautement évolutive prête pour l'international."
               }
-            ]).map((feat: {icon: string, title: string, desc: string}, idx) => {
+            ]).map((feat, idx) => {
+              const f = feat as { icon?: string; title?: string; desc?: string };
               // Dynamic Icon mapping (Fallback to Zap if not found)
               const LucideIcons: Record<string, React.ElementType> = { Zap, Shield, Cpu };
-              const Icon = LucideIcons[feat.icon] || Zap;
+              const Icon = LucideIcons[f.icon || ""] || Zap;
               
               const colors = [
                 { color: "text-afro-blue", bg: "bg-[#0052FF]/5 border-[#0052FF]/10" },
@@ -83,9 +84,9 @@ export default async function Home() {
                   <Icon className={`w-5 h-5 ${themeColor.color}`} />
                 </div>
                 <h3 className="text-lg font-bold text-zinc-950 mb-3 font-sans group-hover:text-afro-blue transition-colors">
-                  {feat.title}
+                  {f.title}
                 </h3>
-                <p className="text-zinc-500 text-sm leading-relaxed font-sans">{feat.desc}</p>
+                <p className="text-zinc-500 text-sm leading-relaxed font-sans">{f.desc}</p>
               </div>
             )})}
           </div>

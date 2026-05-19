@@ -583,7 +583,7 @@ export default function AdminDashboard() {
                 {/* SECTION 1: HERO EDITING */}
                 {activeTab === "hero" && (
                   <div className="glass-light p-8 rounded-3xl shadow-sm border-[#0052FF]/10 flex flex-col gap-6">
-                  <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                    <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
                     <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-afro-blue" /> Section Hero (Accueil)
                     </h3>
@@ -658,12 +658,13 @@ export default function AdminDashboard() {
                       />
                     </div>
                   </div>
+                  </div>
                 )}
 
                 {/* SECTION 2: SERVICES EDITING */}
                 {activeTab === "services" && (
                   <div className="glass-light p-8 rounded-3xl shadow-sm border-[#FFC700]/15 flex flex-col gap-6">
-                  <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                    <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
                     <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2">
                       <Smartphone className="w-4 h-4 text-afro-gold" /> Expertises & Services
                     </h3>
@@ -731,12 +732,13 @@ export default function AdminDashboard() {
                       </div>
                     ))}
                   </div>
+                  </div>
                 )}
 
                 {/* SECTION 3: PORTFOLIO EDITING */}
                 {activeTab === "portfolio" && (
                   <div className="glass-light p-8 rounded-3xl shadow-sm border-[#0052FF]/10 flex flex-col gap-6">
-                  <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                    <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
                     <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2">
                       <Globe className="w-4 h-4 text-afro-blue" /> Portfolio Réalisations
                     </h3>
@@ -873,6 +875,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     ))}
+                    </div>
                   </div>
                 )}
 
