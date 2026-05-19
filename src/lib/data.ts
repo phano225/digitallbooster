@@ -43,6 +43,15 @@ export interface SiteContent {
     subtitle?: string;
     buttonLabel?: string;
   };
+  contact?: {
+    email?: string;
+    phone?: string;
+    title?: string;
+    address?: string;
+    website?: string;
+    description?: string;
+  };
+  footerText?: string;
 }
 
 export async function getSiteContent(): Promise<SiteContent | null> {
@@ -60,7 +69,22 @@ export async function getSiteContent(): Promise<SiteContent | null> {
       return null;
     }
 
-    return data?.payload as SiteContent;
+    const payload = data?.payload as any;
+    if (payload) {
+      // Normalize legacy navigation format from database to match expected array shape
+      if (payload.navigation && !Array.isArray(payload.navigation)) {
+        if (Array.isArray(payload.navigation.links)) {
+          payload.navigation = payload.navigation.links.map((link: any) => ({
+            label: link.label || "",
+            href: link.href || link.url || ""
+          }));
+        } else {
+          payload.navigation = [];
+        }
+      }
+    }
+
+    return payload as SiteContent;
   } catch (err) {
     console.error("Fetch Exception:", err);
     return null;

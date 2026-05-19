@@ -6,9 +6,18 @@ import { AfroGrid, TribalDivider } from "../ui/AfroPatterns";
 
 interface FooterProps {
   navigation?: Array<{ label: string; href: string }>;
+  contact?: {
+    email?: string;
+    phone?: string;
+    title?: string;
+    address?: string;
+    website?: string;
+    description?: string;
+  };
+  footerText?: string;
 }
 
-export default function Footer({ navigation }: FooterProps) {
+export default function Footer({ navigation, contact, footerText }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   const navLinks = navigation && navigation.length > 0 
@@ -55,7 +64,7 @@ export default function Footer({ navigation }: FooterProps) {
             </Link>
             
             <p className="text-zinc-500 text-sm leading-relaxed max-w-xs font-sans">
-              Startup technologique panafricaine spécialisée dans l'ingénierie digitale de luxe. Nous bâtissons les infrastructures de l'Afrique de demain.
+              {contact?.description || "Startup technologique panafricaine spécialisée dans l'ingénierie digitale de luxe. Nous bâtissons les infrastructures de l'Afrique de demain."}
             </p>
             <div className="flex items-center gap-4">
               {[Globe, Share2, Globe, Share2].map((Icon, idx) => (
@@ -98,17 +107,21 @@ export default function Footer({ navigation }: FooterProps) {
             <ul className="flex flex-col gap-5">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-afro-blue shrink-0 mt-0.5" />
-                <span className="text-zinc-500 text-sm font-sans leading-relaxed">
-                  Cocody, Abidjan<br />Côte d'Ivoire
+                <span className="text-zinc-500 text-sm font-sans leading-relaxed whitespace-pre-line">
+                  {contact?.address || "Cocody, Abidjan\nCôte d'Ivoire"}
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-afro-blue shrink-0" />
-                <span className="text-zinc-500 text-sm font-sans">+225 07 00 00 00 00</span>
+                <span className="text-zinc-500 text-sm font-sans">
+                  {contact?.phone || "+225 07 00 00 00 00"}
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-afro-blue shrink-0" />
-                <span className="text-zinc-500 text-sm font-sans">contact@digitallbooster.com</span>
+                <span className="text-zinc-500 text-sm font-sans">
+                  {contact?.email || "contact@digitallbooster.com"}
+                </span>
               </li>
             </ul>
           </div>
@@ -136,7 +149,7 @@ export default function Footer({ navigation }: FooterProps) {
 
         {/* Copyright */}
         <div className="pt-8 border-t border-zinc-100 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-zinc-400 font-bold uppercase tracking-wider font-sans">
-          <p>© {currentYear} Digitall Booster. Conçu pour le futur du continent.</p>
+          <p>© {currentYear} {footerText || "Digitall Booster. Conçu pour le futur du continent."}</p>
           <div className="flex gap-6">
             <Link href="#" className="hover:text-zinc-800 transition-colors">Mentions Légales</Link>
             <Link href="#" className="hover:text-zinc-800 transition-colors">Politique de Confidentialité</Link>

@@ -121,7 +121,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <Footer navigation={content?.navigation} />
+      <Footer navigation={content?.navigation} contact={content?.contact} footerText={content?.footerText} />
     </div>
   );
 }

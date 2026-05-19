@@ -6,7 +6,7 @@ import {
   ArrowLeft, Save, Sparkles, Smartphone, Globe, Rocket, 
   Terminal, ShieldCheck, Database, Server, RefreshCw, 
   Plus, Trash2, CheckCircle2, AlertCircle, LogOut,
-  Palette, Navigation, LayoutTemplate, Zap
+  Palette, Navigation, LayoutTemplate, Zap, Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<"global" | "nav" | "hero" | "services" | "portfolio" | "features">("global");
+  const [activeTab, setActiveTab] = useState<"global" | "nav" | "hero" | "services" | "portfolio" | "features" | "footer">("global");
   
   // Auth state
   const [session, setSession] = useState<any>(null);
@@ -44,7 +44,9 @@ export default function AdminDashboard() {
     navigation: [],
     animations: { enabled: true },
     features: [],
-    cta: { title: "", subtitle: "", buttonLabel: "" }
+    cta: { title: "", subtitle: "", buttonLabel: "" },
+    contact: { email: "", phone: "", address: "", description: "" },
+    footerText: ""
   });
 
   // Load Content from Supabase
@@ -62,13 +64,50 @@ export default function AdminDashboard() {
       if (fetchError) throw fetchError;
       
       if (data?.payload) {
-        const payload = data.payload as SiteContent;
-        // If portfolio is empty in DB, seed with the default hardcoded projects
-        // so the admin can see and edit them
-        if (!payload.portfolio || payload.portfolio.length === 0) {
+        const payload = data.payload as any;
+        
+        // Handle legacy or non-array navigation formats from database payload
+        if (payload.navigation && !Array.isArray(payload.navigation)) {
+          if (Array.isArray(payload.navigation.links)) {
+            payload.navigation = payload.navigation.links.map((link: any) => ({
+              label: link.label || "",
+              href: link.href || link.url || ""
+            }));
+          } else {
+            payload.navigation = [];
+          }
+        } else if (!payload.navigation) {
+          payload.navigation = [];
+        }
+
+        // Ensure other collections are arrays
+        if (!payload.portfolio || !Array.isArray(payload.portfolio) || payload.portfolio.length === 0) {
           payload.portfolio = defaultProjects;
         }
-        setContent(payload);
+        if (!payload.services || !Array.isArray(payload.services)) {
+          payload.services = [];
+        }
+        if (!payload.features || !Array.isArray(payload.features)) {
+          payload.features = [];
+        }
+
+        // Ensure contact fields are initialized
+        if (!payload.contact) {
+          payload.contact = { email: "", phone: "", address: "", description: "" };
+        } else {
+          payload.contact = {
+            email: payload.contact.email || "",
+            phone: payload.contact.phone || "",
+            address: payload.contact.address || "",
+            description: payload.contact.description || ""
+          };
+        }
+
+        if (payload.footerText === undefined || payload.footerText === null) {
+          payload.footerText = "";
+        }
+
+        setContent(payload as SiteContent);
       }
     } catch (err: any) {
       console.error("Error loading content:", err);
@@ -531,6 +570,7 @@ export default function AdminDashboard() {
                     { id: "services", label: "Services", icon: Smartphone },
                     { id: "portfolio", label: "Portfolio", icon: Globe },
                     { id: "features", label: "Atouts", icon: Zap },
+                    { id: "footer", label: "Footer", icon: Info },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -996,6 +1036,77 @@ export default function AdminDashboard() {
                           <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Sous-titre (Message)</label>
                           <textarea rows={2} value={content.cta?.subtitle || ""} onChange={e => setContent(prev => ({...prev, cta: {...prev.cta, subtitle: e.target.value}}))} className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-xs text-zinc-950 resize-none" />
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB: FOOTER */}
+                {activeTab === "footer" && (
+                  <div className="glass-light p-8 rounded-3xl shadow-sm border-[#0052FF]/10 flex flex-col gap-6">
+                    <h3 className="text-sm font-black uppercase tracking-wider text-zinc-950 flex items-center gap-2 border-b border-zinc-100 pb-4">
+                      <Info className="w-4 h-4 text-afro-blue" /> Édition des Informations du Footer
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">E-mail de contact</label>
+                        <input 
+                          type="email" 
+                          value={content.contact?.email || ""} 
+                          onChange={e => setContent(prev => ({
+                            ...prev, 
+                            contact: { ...(prev.contact || {}), email: e.target.value }
+                          }))} 
+                          className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-xs text-zinc-950" 
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Numéro de téléphone</label>
+                        <input 
+                          type="text" 
+                          value={content.contact?.phone || ""} 
+                          onChange={e => setContent(prev => ({
+                            ...prev, 
+                            contact: { ...(prev.contact || {}), phone: e.target.value }
+                          }))} 
+                          className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-xs text-zinc-950" 
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Adresse / Localisation</label>
+                        <input 
+                          type="text" 
+                          value={content.contact?.address || ""} 
+                          onChange={e => setContent(prev => ({
+                            ...prev, 
+                            contact: { ...(prev.contact || {}), address: e.target.value }
+                          }))} 
+                          className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-xs text-zinc-950" 
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Texte de Copyright / Signature</label>
+                        <input 
+                          type="text" 
+                          value={content.footerText || ""} 
+                          onChange={e => setContent(prev => ({
+                            ...prev, 
+                            footerText: e.target.value
+                          }))} 
+                          className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-xs text-zinc-950" 
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2 md:col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Description courte (Footer gauche)</label>
+                        <textarea 
+                          rows={3} 
+                          value={content.contact?.description || ""} 
+                          onChange={e => setContent(prev => ({
+                            ...prev, 
+                            contact: { ...(prev.contact || {}), description: e.target.value }
+                          }))} 
+                          className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-xs text-zinc-950 resize-none" 
+                        />
                       </div>
                     </div>
                   </div>
