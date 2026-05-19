@@ -65,30 +65,41 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then((response: any) => {
-      const activeSession = response.data?.session;
-      setSession(activeSession);
-      if (activeSession) {
-        loadContent();
+    // Ultra-safe auth session check
+    try {
+      if (supabase && supabase.auth && typeof supabase.auth.getSession === 'function') {
+        supabase.auth.getSession().then((response: any) => {
+          const activeSession = response?.data?.session || null;
+          setSession(activeSession);
+          if (activeSession) {
+            loadContent();
+          } else {
+            setLoading(false);
+          }
+        }).catch((err: any) => {
+          console.error("Auth session check error:", err);
+          setLoading(false);
+        });
       } else {
+        console.warn("Supabase auth is not available on this client.");
         setLoading(false);
       }
-    }).catch(() => {
+
+      if (supabase && supabase.auth && typeof supabase.auth.onAuthStateChange === 'function') {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, activeSession: any) => {
+          setSession(activeSession);
+          if (activeSession) {
+            loadContent();
+          } else {
+            setLoading(false);
+          }
+        });
+        return () => subscription?.unsubscribe();
+      }
+    } catch (err) {
+      console.error("Critical error in auth effect:", err);
       setLoading(false);
-    });
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, activeSession: any) => {
-      setSession(activeSession);
-      if (activeSession) {
-        loadContent();
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    }
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -100,6 +111,10 @@ export default function AdminDashboard() {
     const email = username.includes("@") ? username : `${username}@digitallbooster.com`;
 
     try {
+      if (!supabase || !supabase.auth || typeof supabase.auth.signInWithPassword !== 'function') {
+        throw new Error("Supabase auth n'est pas initialisé correctement.");
+      }
+
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password
