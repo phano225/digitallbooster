@@ -252,38 +252,42 @@ export default function AdminDashboard() {
     }));
   };
 
-  // Upload portfolio image using the local API route
+  // Convert image to Base64 and store directly in the database payload (Vercel & Supabase safe)
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Limit file size to 2MB to keep database payload reasonable
+    if (file.size > 2 * 1024 * 1024) {
+      setError("L'image est trop volumineuse. Veuillez choisir une image de moins de 2 Mo.");
+      return;
+    }
 
     try {
       setUploadingIdx(idx);
       setError(null);
 
-      const formData = new FormData();
-      formData.append("file", file);
+      const reader = new FileReader();
+      
+      reader.onload = () => {
+        const base64Url = reader.result as string;
+        
+        // Update state
+        const next = [...(content.portfolio || [])];
+        next[idx] = { ...next[idx], image: base64Url };
+        setContent(prev => ({ ...prev, portfolio: next }));
+        setUploadingIdx(null);
+      };
 
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      reader.onerror = () => {
+        setError("Erreur lors de la lecture du fichier.");
+        setUploadingIdx(null);
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Échec du téléversement");
-      }
-
-      const { url } = await response.json();
-
-      // Update state
-      const next = [...(content.portfolio || [])];
-      next[idx] = { ...next[idx], image: url };
-      setContent(prev => ({ ...prev, portfolio: next }));
+      reader.readAsDataURL(file);
     } catch (err: any) {
-      console.error("Error uploading image:", err);
-      setError("Erreur de téléversement : " + (err.message || "Impossible d'envoyer l'image."));
-    } finally {
+      console.error("Error reading image:", err);
+      setError("Erreur lors de la conversion de l'image.");
       setUploadingIdx(null);
     }
   };
@@ -839,7 +843,7 @@ export default function AdminDashboard() {
                                   />
                                 </div>
                                 <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest block pl-1">
-                                  Stocké localement sur le serveur dans le dossier "public/uploads"
+                                  Converti en Base64 et stocké directement en base de données Supabase (sans restrictions de bucket)
                                 </span>
                               </div>
                             </div>
