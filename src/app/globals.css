@@ -105,6 +105,7 @@ body {
   mask-composite: exclude;
   opacity: 0.3;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 .tribal-border-glow:hover::after {
   opacity: 0.8;
