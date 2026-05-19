@@ -9,10 +9,10 @@
   --color-card: #FFFFFF;
   --color-foreground: #09090B;
   
-  --color-afro-blue: #0052FF;
-  --color-afro-blue-dark: #003ECC;
-  --color-afro-gold: #FFC700;
-  --color-afro-gold-light: #FFD60A;
+  --color-afro-blue: var(--theme-primary, #0052FF);
+  --color-afro-blue-dark: var(--theme-primary, #003ECC);
+  --color-afro-gold: var(--theme-secondary, #FFC700);
+  --color-afro-gold-light: var(--theme-secondary, #FFD60A);
 
   --animate-slow-pan: background-position 20s linear infinite;
   --animate-spin-slow: spin 25s linear infinite;

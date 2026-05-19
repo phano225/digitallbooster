@@ -4,6 +4,7 @@ import Hero from "@/components/sections/Hero";
 import Expertises from "@/components/sections/Expertises";
 import Portfolio from "@/components/sections/Portfolio";
 import Loader from "@/components/ui/Loader";
+import ThemeInjector from "@/components/ui/ThemeInjector";
 import { getSiteContent } from "@/lib/data";
 import { ArrowRight, Zap, Shield, Cpu } from "lucide-react";
 import { AfroGrid, TribalDivider } from "@/components/ui/AfroPatterns";
@@ -17,10 +18,11 @@ export default async function Home() {
 
   return (
     <div className="relative w-full bg-white">
+      <ThemeInjector theme={content?.theme} />
       {/* Immersive Loading Screen */}
       <Loader />
 
-      <Navbar />
+      <Navbar navigation={content?.navigation} />
       
       {/* Hero section */}
       <Hero data={content?.hero} />
@@ -44,42 +46,48 @@ export default async function Home() {
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
+            {(content?.features?.length ? content.features : [
               {
-                icon: Zap,
+                icon: "Zap",
                 title: "Ultra-Performance",
-                desc: "Optimisé pour atteindre 100/100 aux scores Google Core Web Vitals.",
-                color: "text-afro-blue",
-                bg: "bg-[#0052FF]/5 border-[#0052FF]/10"
+                desc: "Optimisé pour atteindre 100/100 aux scores Google Core Web Vitals."
               },
               {
-                icon: Shield,
+                icon: "Shield",
                 title: "Sécurité Maximale",
-                desc: "Protocoles cloud-native avancés et cryptage de pointe de vos données.",
-                color: "text-afro-gold",
-                bg: "bg-[#FFC700]/5 border-[#FFC700]/15"
+                desc: "Protocoles cloud-native avancés et cryptage de pointe de vos données."
               },
               {
-                icon: Cpu,
+                icon: "Cpu",
                 title: "Architecture Moderne",
-                desc: "Bâti sur une stack serverless hautement évolutive prête pour l'international.",
-                color: "text-afro-blue",
-                bg: "bg-[#0052FF]/5 border-[#0052FF]/10"
+                desc: "Bâti sur une stack serverless hautement évolutive prête pour l'international."
               }
-            ].map((feat, idx) => (
+            ]).map((feat: {icon: string, title: string, desc: string}, idx) => {
+              // Dynamic Icon mapping (Fallback to Zap if not found)
+              const LucideIcons: Record<string, React.ElementType> = { Zap, Shield, Cpu };
+              const Icon = LucideIcons[feat.icon] || Zap;
+              
+              const colors = [
+                { color: "text-afro-blue", bg: "bg-[#0052FF]/5 border-[#0052FF]/10" },
+                { color: "text-afro-gold", bg: "bg-[#FFC700]/5 border-[#FFC700]/15" },
+                { color: "text-afro-blue", bg: "bg-[#0052FF]/5 border-[#0052FF]/10" }
+              ];
+              const themeColor = colors[idx % colors.length];
+
+              return (
               <div 
                 key={idx} 
                 className="group p-8 bg-white border border-zinc-100 rounded-3xl transition-all duration-300 hover:border-[#0052FF]/20 hover:shadow-xl hover:shadow-[#0052FF]/5 tribal-border-glow"
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${feat.bg} mb-6 transform transition-transform group-hover:scale-110`}>
-                  <feat.icon className={`w-5 h-5 ${feat.color}`} />
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${themeColor.bg} mb-6 transform transition-transform group-hover:scale-110`}>
+                  <Icon className={`w-5 h-5 ${themeColor.color}`} />
                 </div>
                 <h3 className="text-lg font-bold text-zinc-950 mb-3 font-sans group-hover:text-afro-blue transition-colors">
                   {feat.title}
                 </h3>
                 <p className="text-zinc-500 text-sm leading-relaxed font-sans">{feat.desc}</p>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </section>
@@ -95,7 +103,7 @@ export default async function Home() {
 
         <div className="max-w-2xl relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-afro-blue/5 to-afro-blue/10 border border-[#0052FF]/10 text-afro-blue text-[10px] font-black tracking-[0.18em] uppercase mb-8 shadow-sm">
-            Prêt à Décoller
+            {content?.cta?.title || "Prêt à Décoller"}
           </div>
           
           <h2 className="text-3xl md:text-5xl font-black mb-6 text-zinc-950 font-sans tracking-tight leading-tight">
@@ -103,16 +111,16 @@ export default async function Home() {
           </h2>
           
           <p className="text-zinc-500 mb-10 text-base md:text-lg leading-relaxed font-sans max-w-lg mx-auto">
-            Faites appel à l'excellence technologique de Digitall Booster et obtenez une solution digitale de luxe qui transforme votre croissance.
+            {content?.cta?.subtitle || "Faites appel à l'excellence technologique de Digitall Booster et obtenez une solution digitale de luxe qui transforme votre croissance."}
           </p>
           
           <button className="px-8 py-4.5 rounded-full bg-gradient-to-r from-afro-blue to-blue-600 text-white text-xs font-black uppercase tracking-wider hover:shadow-xl hover:shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2 mx-auto shadow-lg shadow-blue-500/10">
-            Démarrer un projet <ArrowRight className="w-4 h-4" />
+            {content?.cta?.buttonLabel || "Démarrer un projet"} <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </section>
 
-      <Footer />
+      <Footer navigation={content?.navigation} />
     </div>
   );
 }

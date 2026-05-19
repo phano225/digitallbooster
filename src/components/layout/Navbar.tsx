@@ -5,7 +5,11 @@ import Link from "next/link";
 import { Menu, X, ArrowRight, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function Navbar() {
+interface NavbarProps {
+  navigation?: Array<{ label: string; href: string }>;
+}
+
+export default function Navbar({ navigation }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -15,11 +19,13 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: "Accueil", href: "#" },
-    { name: "Expertises", href: "#services" },
-    { name: "Réalisations", href: "#portfolio" },
-  ];
+  const navLinks = navigation && navigation.length > 0 
+    ? navigation.map(n => ({ name: n.label, href: n.href }))
+    : [
+        { name: "Accueil", href: "#" },
+        { name: "Expertises", href: "#services" },
+        { name: "Réalisations", href: "#portfolio" },
+      ];
 
   return (
     <header 

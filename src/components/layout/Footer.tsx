@@ -4,8 +4,20 @@ import Link from "next/link";
 import { Mail, Phone, MapPin, Send, Globe, Share2, ShieldCheck } from "lucide-react";
 import { AfroGrid, TribalDivider } from "../ui/AfroPatterns";
 
-export default function Footer() {
+interface FooterProps {
+  navigation?: Array<{ label: string; href: string }>;
+}
+
+export default function Footer({ navigation }: FooterProps) {
   const currentYear = new Date().getFullYear();
+
+  const navLinks = navigation && navigation.length > 0 
+    ? navigation.map(n => ({ name: n.label, href: n.href }))
+    : [
+        { name: "Accueil", href: "#" },
+        { name: "Expertises", href: "#services" },
+        { name: "Réalisations", href: "#portfolio" }
+      ];
 
   return (
     <footer className="bg-white border-t border-[#0052FF]/10 pt-16 pb-8 relative overflow-hidden">
@@ -64,11 +76,7 @@ export default function Footer() {
               Plan du Site
             </h4>
             <ul className="flex flex-col gap-4">
-              {[
-                { name: "Accueil", href: "#" },
-                { name: "Expertises", href: "#services" },
-                { name: "Réalisations", href: "#portfolio" }
-              ].map((link) => (
+              {navLinks.map((link) => (
                 <li key={link.name}>
                   <Link 
                     href={link.href} 

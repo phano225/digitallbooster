@@ -2,6 +2,17 @@ import { supabase } from "./supabase";
 
 // Basic Content Definitions matching our Supabase payload
 export interface SiteContent {
+  theme?: {
+    primaryColor?: string;
+    secondaryColor?: string;
+  };
+  navigation?: Array<{
+    label: string;
+    href: string;
+  }>;
+  animations?: {
+    enabled: boolean;
+  };
   hero?: {
     eyebrow?: string;
     title?: string;
@@ -22,6 +33,16 @@ export interface SiteContent {
     description?: string;
     tags?: string[];
   }>;
+  features?: Array<{
+    icon?: string;
+    title?: string;
+    desc?: string;
+  }>;
+  cta?: {
+    title?: string;
+    subtitle?: string;
+    buttonLabel?: string;
+  };
 }
 
 export async function getSiteContent(): Promise<SiteContent | null> {
