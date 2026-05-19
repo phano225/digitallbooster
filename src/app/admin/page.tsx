@@ -252,7 +252,7 @@ export default function AdminDashboard() {
     }));
   };
 
-  // Upload portfolio image directly to Supabase Storage Bucket
+  // Upload portfolio image using the local API route
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -261,31 +261,24 @@ export default function AdminDashboard() {
       setUploadingIdx(idx);
       setError(null);
 
-      // Generate a unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const formData = new FormData();
+      formData.append("file", file);
 
-      // Upload file to Supabase Storage Bucket 'portfolio'
-      const { error: uploadError } = await supabase.storage
-        .from('portfolio')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-      if (uploadError) throw uploadError;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Échec du téléversement");
+      }
 
-      // Get public URL
-      const { data } = supabase.storage
-        .from('portfolio')
-        .getPublicUrl(filePath);
-
-      const publicUrl = data.publicUrl;
+      const { url } = await response.json();
 
       // Update state
       const next = [...(content.portfolio || [])];
-      next[idx] = { ...next[idx], image: publicUrl };
+      next[idx] = { ...next[idx], image: url };
       setContent(prev => ({ ...prev, portfolio: next }));
     } catch (err: any) {
       console.error("Error uploading image:", err);
@@ -846,7 +839,7 @@ export default function AdminDashboard() {
                                   />
                                 </div>
                                 <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest block pl-1">
-                                  Stocké directement dans votre bucket Supabase public "portfolio"
+                                  Stocké localement sur le serveur dans le dossier "public/uploads"
                                 </span>
                               </div>
                             </div>
