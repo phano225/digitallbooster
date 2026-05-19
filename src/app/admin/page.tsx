@@ -5,7 +5,7 @@ import Link from "next/link";
 import { 
   ArrowLeft, Save, Sparkles, Smartphone, Globe, Rocket, 
   Terminal, ShieldCheck, Database, Server, RefreshCw, 
-  Plus, Trash2, CheckCircle2, AlertCircle 
+  Plus, Trash2, CheckCircle2, AlertCircle, LogOut
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
@@ -19,6 +19,13 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   
+  // Auth state
+  const [session, setSession] = useState<any>(null);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
   // Site Content state
   const [content, setContent] = useState<SiteContent>({
     hero: {
@@ -58,8 +65,64 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    loadContent();
+    // Check current session
+    supabase.auth.getSession().then((response: any) => {
+      const activeSession = response.data?.session;
+      setSession(activeSession);
+      if (activeSession) {
+        loadContent();
+      } else {
+        setLoading(false);
+      }
+    }).catch(() => {
+      setLoading(false);
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, activeSession: any) => {
+      setSession(activeSession);
+      if (activeSession) {
+        loadContent();
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginError(null);
+
+    // Map "admin" to "admin@digitallbooster.com"
+    const email = username.includes("@") ? username : `${username}@digitallbooster.com`;
+
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (authError) throw authError;
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setLoginError(err.message || "Identifiants invalides");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setContent({
+      hero: { eyebrow: "", title: "", subtitle: "", primaryCtaLabel: "", secondaryCtaLabel: "" },
+      services: [],
+      portfolio: []
+    });
+  };
 
   // Save Content back to Supabase
   const saveContent = async () => {
@@ -166,6 +229,102 @@ export default function AdminDashboard() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FCFCFD] flex flex-col items-center justify-center gap-3">
+        <RefreshCw className="w-8 h-8 animate-spin text-afro-blue" />
+        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Chargement de la console...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="relative min-h-screen bg-[#FCFCFD] text-zinc-900 font-sans flex items-center justify-center p-6">
+        {/* Background patterns */}
+        <AfroGrid className="opacity-[0.03]" />
+        
+        {/* Glow Orbs */}
+        <div className="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] bg-afro-blue/5 rounded-full filter blur-[100px] pointer-events-none z-0" />
+        <div className="fixed bottom-[-10%] left-[-10%] w-[450px] h-[450px] bg-afro-gold/4 rounded-full filter blur-[90px] pointer-events-none z-0" />
+
+        <div className="relative z-10 w-full max-w-md bg-white border border-zinc-100 p-8 md:p-10 rounded-3xl shadow-xl shadow-[#0052FF]/5 relative overflow-hidden tribal-border-glow">
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#0052FF]/2 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          
+          <div className="flex flex-col items-center mb-8">
+            <Link href="/" className="flex items-center space-x-3 mb-6 group relative">
+              <div className="relative w-12 h-12 bg-white border border-[#0052FF]/15 rounded-xl flex items-center justify-center text-black font-black text-lg group-hover:rotate-6 transition-transform shadow-lg shadow-[#0052FF]/5">
+                <span className="tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-zinc-950 via-afro-blue to-afro-blue-dark">
+                  DB
+                </span>
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-afro-gold rounded-full border border-white" />
+              </div>
+            </Link>
+            <h2 className="text-sm font-black tracking-[0.2em] text-zinc-950 font-serif text-center uppercase">
+              CONSOLE ADMINISTRATION
+            </h2>
+            <p className="text-[9px] tracking-[0.3em] text-[#0052FF] font-bold uppercase mt-1">
+              ACCÈS SÉCURISÉ DIGITALL BOOSTER
+            </p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            {loginError && (
+              <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
+                Identifiant administrateur
+              </label>
+              <input 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Ex: admin"
+                required
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#0052FF] focus:border-[#0052FF] transition-all font-sans"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
+                Mot de passe
+              </label>
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                required
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#0052FF] focus:border-[#0052FF] transition-all font-sans"
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={loginLoading}
+              className="w-full py-3.5 bg-gradient-to-r from-afro-blue to-blue-600 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:shadow-[0_4px_20px_rgba(0,82,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loginLoading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Connexion...
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4" /> Se connecter
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen bg-[#FCFCFD] text-zinc-900 font-sans pb-16">
       {/* Background patterns */}
@@ -221,6 +380,14 @@ export default function AdminDashboard() {
                   <Save className="w-3.5 h-3.5" /> Enregistrer
                 </>
               )}
+            </button>
+
+            <button 
+              onClick={handleLogout}
+              className="p-3 border border-zinc-200 text-zinc-500 hover:text-red-500 hover:border-red-100 hover:bg-red-50/50 transition-all rounded-xl flex items-center justify-center"
+              title="Se déconnecter"
+            >
+              <LogOut className="w-4.5 h-4.5" />
             </button>
           </div>
         </div>
