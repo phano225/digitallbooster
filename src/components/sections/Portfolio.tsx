@@ -12,7 +12,7 @@ export interface Project {
   tags?: string[];
 }
 
-const defaultProjects: Project[] = [
+export const defaultProjects: Project[] = [
   {
     title: "Bamousso RH Platform",
     category: "SaaS Enterprise",

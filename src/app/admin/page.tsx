@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import { defaultProjects } from "@/components/sections/Portfolio";
 import { SiteContent } from "@/lib/data";
 import { AfroGrid, HoloCircle } from "@/components/ui/AfroPatterns";
 
@@ -61,7 +62,13 @@ export default function AdminDashboard() {
       if (fetchError) throw fetchError;
       
       if (data?.payload) {
-        setContent(data.payload as SiteContent);
+        const payload = data.payload as SiteContent;
+        // If portfolio is empty in DB, seed with the default hardcoded projects
+        // so the admin can see and edit them
+        if (!payload.portfolio || payload.portfolio.length === 0) {
+          payload.portfolio = defaultProjects;
+        }
+        setContent(payload);
       }
     } catch (err: any) {
       console.error("Error loading content:", err);
