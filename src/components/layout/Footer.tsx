@@ -67,18 +67,14 @@ export default function Footer() {
               {[
                 { name: "Accueil", href: "#" },
                 { name: "Expertises", href: "#services" },
-                { name: "Portfolio", href: "#portfolio" },
-                { name: "Console Administration", href: "/admin" }
+                { name: "Réalisations", href: "#portfolio" }
               ].map((link) => (
                 <li key={link.name}>
                   <Link 
                     href={link.href} 
-                    className={`text-zinc-500 hover:text-zinc-950 transition-colors text-sm inline-flex items-center group font-bold ${
-                      link.href === "/admin" ? "text-afro-blue" : ""
-                    }`}
+                    className="text-zinc-500 hover:text-zinc-950 transition-colors text-sm inline-flex items-center group font-bold"
                   >
                     <span className="w-0 h-[1.5px] bg-[#0052FF] group-hover:w-3 transition-all duration-300 mr-0 group-hover:mr-2" />
-                    {link.href === "/admin" && <ShieldCheck className="w-4 h-4 mr-1.5 shrink-0" />}
                     {link.name}
                   </Link>
                 </li>

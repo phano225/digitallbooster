@@ -19,7 +19,6 @@ export default function Navbar() {
     { name: "Accueil", href: "#" },
     { name: "Expertises", href: "#services" },
     { name: "Réalisations", href: "#portfolio" },
-    { name: "Console Admin", href: "/admin" },
   ];
 
   return (
